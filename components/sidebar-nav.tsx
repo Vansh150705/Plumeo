@@ -33,7 +33,12 @@ export function SidebarNav({ user }: { user: AppUser }) {
           <div key={group.label} className="mb-4">
             <div className="px-3 pb-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">{group.label}</div>
             {group.items.map(item => {
-              const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href + '/'));
+              // Root dashboard hrefs (e.g. /manager, /admin, /employee) should
+              // only match exactly — otherwise they light up on every sub-route.
+              const isRoot = item.href.split('/').filter(Boolean).length === 1;
+              const active = isRoot
+                ? pathname === item.href
+                : pathname === item.href || pathname.startsWith(item.href + '/');
               return (
                 <Link
                   key={item.href}
