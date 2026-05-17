@@ -135,8 +135,6 @@ npm run dev
 
 ## ☁️ Deploy to Vercel
 
-See [`DEPLOY.md`](./DEPLOY.md) for the full walkthrough — copy-paste ready.
-
 **TL;DR:**
 1. Push the repo to GitHub
 2. Import into Vercel → set the three env vars from `.env.example`
