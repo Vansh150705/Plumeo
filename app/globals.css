@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme — refined editorial */
+    --background: 30 20% 98%;
+    --foreground: 20 14% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 14% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14% 12%;
+    --primary: 39 88% 55%;            /* warm gold #f0b429 */
+    --primary-foreground: 20 14% 8%;
+    --secondary: 30 8% 95%;
+    --secondary-foreground: 20 14% 12%;
+    --muted: 30 8% 95%;
+    --muted-foreground: 20 6% 45%;
+    --accent: 30 8% 92%;
+    --accent-foreground: 20 14% 12%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 8% 88%;
+    --input: 30 8% 88%;
+    --ring: 39 88% 55%;
+    --radius: 0.75rem;
+
+    --font-geist: 'Geist', system-ui, sans-serif;
+    --font-geist-mono: 'Geist Mono', ui-monospace, monospace;
+    --font-instrument: 'Instrument Serif', serif;
+  }
+
+  .dark {
+    --background: 240 6% 5%;
+    --foreground: 30 5% 93%;
+    --card: 240 4% 7%;
+    --card-foreground: 30 5% 93%;
+    --popover: 240 4% 7%;
+    --popover-foreground: 30 5% 93%;
+    --primary: 39 88% 55%;
+    --primary-foreground: 240 6% 5%;
+    --secondary: 240 4% 12%;
+    --secondary-foreground: 30 5% 93%;
+    --muted: 240 4% 12%;
+    --muted-foreground: 30 3% 65%;
+    --accent: 240 4% 14%;
+    --accent-foreground: 30 5% 93%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 30 5% 93%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 39 88% 55%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html, body { @apply bg-background text-foreground; }
+  body {
+    font-family: var(--font-geist);
+    font-feature-settings: "ss01", "cv11";
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .font-serif { font-family: var(--font-instrument); letter-spacing: -0.02em; font-weight: 400; }
+  .font-mono { font-family: var(--font-geist-mono); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--muted)); border-radius: 8px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--accent)); }
+}
+
+@layer components {
+  /* Grain overlay */
+  .grain::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; opacity: 0.025; z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' /%3E%3C/svg%3E");
+  }
+
+  /* Subtle gradient mesh for hero areas */
+  .mesh-bg {
+    background:
+      radial-gradient(at 20% 20%, hsl(39 88% 55% / 0.07) 0px, transparent 50%),
+      radial-gradient(at 80% 30%, hsl(280 70% 60% / 0.04) 0px, transparent 50%),
+      radial-gradient(at 40% 80%, hsl(210 80% 60% / 0.03) 0px, transparent 50%);
+  }
+
+  /* Pills */
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
+
+  .pill-green  { @apply bg-emerald-500/10 text-emerald-500; }
+  .pill-red    { @apply bg-red-500/10 text-red-400; }
+  .pill-blue   { @apply bg-blue-500/10 text-blue-400; }
+  .pill-purple { @apply bg-purple-500/10 text-purple-400; }
+  .pill-orange { @apply bg-orange-500/10 text-orange-400; }
+  .pill-gray   { @apply bg-muted text-muted-foreground; }
+  .pill-gold   { @apply bg-primary/15 text-primary; }
+}
