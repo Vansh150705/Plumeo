@@ -61,7 +61,7 @@ export function LandingClient() {
             <a href="#features" className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition rounded-md hover:bg-accent">Features</a>
             <a href="#architecture" className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition rounded-md hover:bg-accent">Architecture</a>
             <a href="#brd" className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition rounded-md hover:bg-accent">BRD coverage</a>
-            <a href="https://github.com" target="_blank" rel="noreferrer" className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition rounded-md hover:bg-accent inline-flex items-center gap-1.5">
+            <a href="https://github.com/Vansh150705/atomquest-goals" target="_blank" rel="noreferrer" className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition rounded-md hover:bg-accent inline-flex items-center gap-1.5">
               <Github className="size-3.5" /> GitHub
             </a>
           </div>
@@ -314,7 +314,7 @@ export function LandingClient() {
             </div>
           </div>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <a href="https://github.com" className="hover:text-foreground transition inline-flex items-center gap-1.5">
+            <a href="https://github.com/Vansh150705/atomquest-goals" className="hover:text-foreground transition inline-flex items-center gap-1.5">
               <Github className="size-3.5" /> Source
             </a>
             <a href="/docs/architecture.svg" className="hover:text-foreground transition inline-flex items-center gap-1.5">

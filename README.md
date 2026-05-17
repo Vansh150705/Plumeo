@@ -10,7 +10,7 @@
 
 ## 🚀 Live demo
 
-**URL:** https://atomquest-goals.vercel.app
+**URL:** https://atomquest-goals-gray.vercel.app/
 
 **Three one-click logins on the landing page** — no password entry required.
 
@@ -96,7 +96,7 @@
 
 ### 1. Clone and install
 ```bash
-git clone https://github.com/<your-handle>/atomquest-goals.git
+git clone https://github.com/Vansh150705/atomquest-goals
 cd atomquest-goals
 npm install
 ```
