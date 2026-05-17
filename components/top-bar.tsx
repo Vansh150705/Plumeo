@@ -1,14 +1,36 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Bell, Search } from 'lucide-react';
 import { Pill } from '@/components/ui/pill';
 import { fmtRelative } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
 import type { AppUser, Notification } from '@/lib/types';
 
-export function TopBar({ user, notifications }: { user: AppUser; notifications: Notification[] }) {
+export function TopBar({ user, notifications: initialNotifications }: { user: AppUser; notifications: Notification[] }) {
   const [open, setOpen] = useState(false);
+  const [notifications, setNotifications] = useState(initialNotifications);
+  const router = useRouter();
+
+  async function handleNotificationClick(n: Notification) {
+    setOpen(false);
+    // Optimistically remove the unread indicator
+    if (!n.read_at) {
+      setNotifications(prev => prev.filter(x => x.id !== n.id));
+      try {
+        const supabase = createClient();
+        await supabase
+          .from('notifications')
+          .update({ read_at: new Date().toISOString() })
+          .eq('id', n.id);
+      } catch (err) {
+        console.error('Failed to mark notification read:', err);
+      }
+    }
+    if (n.deep_link) router.push(n.deep_link);
+  }
 
   return (
     <header className="h-14 px-6 border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-30 flex items-center justify-between">
@@ -61,11 +83,10 @@ export function TopBar({ user, notifications }: { user: AppUser; notifications: 
                     </div>
                   ) : (
                     notifications.map(n => (
-                      <Link
+                      <button
                         key={n.id}
-                        href={n.deep_link ?? '#'}
-                        className="block px-4 py-3 hover:bg-accent border-b border-border last:border-0 transition"
-                        onClick={() => setOpen(false)}
+                        onClick={() => handleNotificationClick(n)}
+                        className="block w-full text-left px-4 py-3 hover:bg-accent border-b border-border last:border-0 transition"
                       >
                         <div className="flex items-start gap-2 mb-1">
                           <Pill variant={n.channel === 'Email' ? 'blue' : n.channel === 'Teams' ? 'purple' : 'gray'}>
@@ -75,7 +96,7 @@ export function TopBar({ user, notifications }: { user: AppUser; notifications: 
                         </div>
                         <div className="text-sm font-medium mb-0.5">{n.subject}</div>
                         <div className="text-xs text-muted-foreground line-clamp-2">{n.body}</div>
-                      </Link>
+                      </button>
                     ))
                   )}
                 </div>
