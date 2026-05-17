@@ -15,30 +15,25 @@ export default async function ManagerHome() {
   if (!user) redirect('/');
 
   // Reports
-  const { data: reports } = await supabase
-    .from('users')
-    .select('*')
-    .eq('manager_id', user.id)
-    .order('full_name');
+  const [{ data: reports }, { data: cycle }] = await Promise.all([
+    supabase.from('users').select('*').eq('manager_id', user.id).order('full_name'),
+    supabase.from('cycles').select('*').eq('is_active', true).single(),
+  ]);
 
   const reportIds = (reports ?? []).map(r => r.id);
-  const { data: cycle } = await supabase.from('cycles').select('*').eq('is_active', true).single();
+  const idGuard = reportIds.length ? reportIds : ['00000000-0000-0000-0000-000000000000'];
 
-  const { data: sheets } = await supabase
-    .from('goal_sheets')
-    .select('*, goals(*)')
-    .eq('cycle_id', cycle!.id)
-    .in('employee_id', reportIds.length ? reportIds : ['00000000-0000-0000-0000-000000000000']);
+  // Sheets 
+  const [{ data: sheets }, { data: escalations }] = await Promise.all([
+    supabase.from('goal_sheets').select('*, goals(*)').eq('cycle_id', cycle!.id).in('employee_id', idGuard),
+    supabase.from('escalation_events')
+      .select('*, rule:escalation_rules(name), subject:users!escalation_events_subject_id_fkey(full_name)')
+      .in('subject_id', idGuard)
+      .is('resolved_at', null)
+      .order('triggered_at', { ascending: false })
+      .limit(5),
+  ]);
 
-  const { data: escalations } = await supabase
-    .from('escalation_events')
-    .select('*, rule:escalation_rules(name), subject:users!escalation_events_subject_id_fkey(full_name)')
-    .in('subject_id', reportIds.length ? reportIds : ['00000000-0000-0000-0000-000000000000'])
-    .is('resolved_at', null)
-    .order('triggered_at', { ascending: false })
-    .limit(5);
-
-  // Compute sheet score per report (across all goals + check-ins captured)
   const allGoalIds = (sheets ?? []).flatMap((s: any) => (s.goals ?? []).map((g: any) => g.id));
   const { data: allCheckIns } = allGoalIds.length
     ? await supabase.from('check_ins').select('*, goal:goals(*)').in('goal_id', allGoalIds)

@@ -14,22 +14,22 @@ export default async function AdminHome() {
   if (!user) redirect('/');
 
   const { data: cycle } = await supabase.from('cycles').select('*').eq('is_active', true).single();
-  const { data: users } = await supabase.from('users').select('*').eq('is_active', true);
-  const { data: sheets } = await supabase
-    .from('goal_sheets')
-    .select('*')
-    .eq('cycle_id', cycle!.id);
-  const { data: escalations } = await supabase
-    .from('escalation_events')
-    .select('*, rule:escalation_rules(name), subject:users!escalation_events_subject_id_fkey(full_name)')
-    .is('resolved_at', null)
-    .order('triggered_at', { ascending: false })
-    .limit(5);
-  const { data: recentAudits } = await supabase
-    .from('audit_log')
-    .select('*')
-    .order('occurred_at', { ascending: false })
-    .limit(8);
+
+  const [
+    { data: users },
+    { data: sheets },
+    { data: escalations },
+    { data: recentAudits },
+  ] = await Promise.all([
+    supabase.from('users').select('*').eq('is_active', true),
+    supabase.from('goal_sheets').select('*').eq('cycle_id', cycle!.id),
+    supabase.from('escalation_events')
+      .select('*, rule:escalation_rules(name), subject:users!escalation_events_subject_id_fkey(full_name)')
+      .is('resolved_at', null)
+      .order('triggered_at', { ascending: false })
+      .limit(5),
+    supabase.from('audit_log').select('*').order('occurred_at', { ascending: false }).limit(8),
+  ]);
 
   const byStatus = {
     Draft:     (sheets ?? []).filter(s => s.status === 'Draft').length,
