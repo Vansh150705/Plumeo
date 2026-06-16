@@ -5,7 +5,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'AtomQuest — Goal Setting & Tracking Portal',
-  description: 'Enterprise OKR & performance management. Built for AtomQuest Hackathon 2026.',
+  description: 'A structured portal for the full goal lifecycle — creation, manager approval, quarterly check-ins, and audit-ready visibility. Built on Next.js, Supabase, and Vercel.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
