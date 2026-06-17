@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,400..600&family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -106,140 +106,76 @@
 
 /* ---- Plumeo landing -----------------------------------------------------
    The app runs dark (<html class="dark"> in layout.tsx); the marketing page is
-   the opposite. Everything is scoped to .plumeo so the dashboards are untouched.
-   White canvas, slate-violet ink, a refined violet light system used as glow and
-   gradient accents (not flat fills). Motion is handled in TSX via Framer Motion;
-   this file owns the surfaces, gradients and texture. */
+   the opposite, scoped to .plumeo so the dashboards stay untouched.
+   Direction: a genuinely PLAIN WHITE page. Colour comes only from deep-navy ink,
+   a single soft-gold accent, and hand-built character illustrations. No colour
+   washes, no gradients across the background. Fraunces (display) + Geist (UI). */
 
-/* register the conic angle so the animated gradient borders can tween smoothly */
-@property --pl-a { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-
-/* token scope — applied to the page root AND the portal-less modal so both share
-   the palette. kept free of layout props so it never fights utilities. */
 .plumeo, .pl-scope {
   --background: 0 0% 100%;
-  --foreground: 252 24% 11%;          /* near-black with a violet undertone */
+  --foreground: 218 54% 14%;          /* deep navy ink ~#11203A */
   --card: 0 0% 100%;
-  --card-foreground: 252 24% 11%;
+  --card-foreground: 218 54% 14%;
   --popover: 0 0% 100%;
-  --popover-foreground: 252 24% 11%;
-  --primary: 256 68% 54%;             /* the violet accent */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 252 30% 98%;
-  --secondary-foreground: 252 24% 11%;
-  --muted: 252 24% 97%;
-  --muted-foreground: 252 8% 42%;
-  --accent: 252 30% 96%;
-  --accent-foreground: 252 24% 11%;
-  --border: 252 16% 90%;
-  --input: 252 16% 90%;
-  --ring: 256 68% 54%;
+  --popover-foreground: 218 54% 14%;
+  --primary: 218 56% 16%;             /* navy — the primary button */
+  --primary-foreground: 40 56% 97%;
+  --secondary: 40 38% 96%;            /* warm cream — used only inside panels */
+  --secondary-foreground: 218 54% 14%;
+  --muted: 40 24% 96%;
+  --muted-foreground: 218 14% 42%;
+  --accent: 40 36% 94%;
+  --accent-foreground: 218 54% 14%;
+  --border: 218 20% 90%;
+  --input: 218 20% 90%;
+  --ring: 38 56% 46%;
 
-  /* gradient stops reused across glows, text and borders */
-  --g1: 256 72% 58%;   /* violet  */
-  --g2: 232 84% 60%;   /* indigo  */
-  --g3: 288 70% 62%;   /* orchid  */
+  /* brand tones reached for directly in the components / illustrations */
+  --gold: 38 56% 46%;                 /* soft gold ~#B8893A */
+  --gold-2: 36 64% 56%;
+  --cream: 40 44% 97%;
+  --navy: 218 56% 16%;
+  --skin: 28 48% 80%;
+  --skin-2: 26 42% 70%;
 
-  color: hsl(252 24% 11%);
+  color: hsl(218 54% 14%);
   -webkit-font-smoothing: antialiased;
 }
 
-/* page-root-only layout (NOT on the modal, or it would cover the scrim) */
-.plumeo {
-  background: #fff;
-  position: relative;
-  overflow-x: hidden;
-  letter-spacing: -0.012em;
-}
+.plumeo { background: #fff; position: relative; overflow-x: hidden; letter-spacing: -0.011em; }
 
-.plumeo h1, .plumeo h2, .plumeo h3 { letter-spacing: -0.03em; }
+.font-display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; letter-spacing: -0.02em; }
+.plumeo h1, .plumeo h2, .plumeo h3 { letter-spacing: -0.022em; }
 
-/* fine film grain over the whole page for a premium, non-flat surface */
-.pl-noise::after {
-  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
+.pl-gold { color: hsl(var(--gold)); }
 
-/* contained aurora — soft animated colour light, kept low so white still wins */
-.pl-aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.pl-aurora > i {
-  position: absolute; display: block; border-radius: 9999px; filter: blur(70px);
-  opacity: 0.55; will-change: transform; animation: pl-drift var(--d, 22s) ease-in-out infinite;
-}
+/* soft, neutral elevation — never coloured */
+.pl-shadow-sm { box-shadow: 0 1px 2px hsl(218 40% 12% / 0.04), 0 10px 26px -18px hsl(218 40% 16% / 0.18); }
+.pl-shadow-lg { box-shadow: 0 2px 10px hsl(218 40% 12% / 0.05), 0 40px 80px -48px hsl(218 40% 16% / 0.28); }
 
-/* faint grid that dissolves toward the edges */
-.pl-grid {
-  background-image:
-    linear-gradient(to right, hsl(252 16% 86% / 0.55) 1px, transparent 1px),
-    linear-gradient(to bottom, hsl(252 16% 86% / 0.55) 1px, transparent 1px);
-  background-size: 56px 56px;
-  -webkit-mask-image: radial-gradient(115% 75% at 50% 0%, #000 0%, transparent 60%);
-          mask-image: radial-gradient(115% 75% at 50% 0%, #000 0%, transparent 60%);
-}
+/* hairline divider */
+.pl-rule { background: hsl(var(--border)); }
 
-/* dotted texture variant used behind some panels */
-.pl-dots {
-  background-image: radial-gradient(hsl(252 20% 80% / 0.6) 1px, transparent 1px);
-  background-size: 22px 22px;
-  -webkit-mask-image: radial-gradient(80% 80% at 50% 50%, #000, transparent 75%);
-          mask-image: radial-gradient(80% 80% at 50% 50%, #000, transparent 75%);
-}
+/* a hand-drawn gold underline that draws itself in (the only "highlight" effect) */
+.pl-underline path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.pl-underline.pl-drawn path { animation: pl-draw 0.9s 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
 
-.pl-accent { color: hsl(var(--g1)); }
+/* gentle, classy float for illustration accents */
+.pl-float  { animation: pl-float 7s ease-in-out infinite; }
+.pl-float-2 { animation: pl-float 8s ease-in-out infinite; animation-delay: -3s; }
 
-/* the brand gradient as text fill — used on a single highlight word, not everywhere */
-.pl-grad {
-  background-image: linear-gradient(100deg, hsl(var(--g1)), hsl(var(--g2)) 46%, hsl(var(--g3)));
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent; color: transparent;
-}
-
-/* animated conic gradient hairline border (draws a rotating light around a card) */
-.pl-gborder { position: relative; isolation: isolate; }
-.pl-gborder::before {
-  content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; z-index: -1;
-  background: conic-gradient(from var(--pl-a), hsl(var(--g1)), hsl(var(--g2)), hsl(var(--g3)), hsl(var(--g1)));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude;
-  animation: pl-rotate 8s linear infinite;
-}
-
-/* cursor spotlight on cards — JS feeds --mx / --my from the pointer */
-.pl-spot { position: relative; }
-.pl-spot::before {
-  content: ''; position: absolute; inset: 0; border-radius: inherit; opacity: 0;
-  transition: opacity 0.35s ease; pointer-events: none;
-  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), hsl(var(--g1) / 0.10), transparent 70%);
-}
-.pl-spot:hover::before { opacity: 1; }
-
-/* soft elevation tiers */
-.pl-shadow-sm { box-shadow: 0 1px 2px hsl(252 24% 11% / 0.04), 0 8px 24px -16px hsl(252 30% 20% / 0.18); }
-.pl-shadow-lg { box-shadow: 0 2px 8px hsl(252 24% 11% / 0.05), 0 40px 90px -50px hsl(256 60% 30% / 0.45); }
-
-/* keyword marquee */
-.pl-marquee-track { display: inline-flex; white-space: nowrap; animation: pl-marquee 40s linear infinite; }
+/* keyword rail */
+.pl-marquee-track { display: inline-flex; white-space: nowrap; animation: pl-marquee 46s linear infinite; }
 .pl-marquee:hover .pl-marquee-track { animation-play-state: paused; }
 
-@keyframes pl-rotate  { to { --pl-a: 360deg; } }
+@keyframes pl-draw   { to { stroke-dashoffset: 0; } }
+@keyframes pl-float  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 @keyframes pl-marquee { to { transform: translateX(-50%); } }
-@keyframes pl-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%      { transform: translate(30px, -22px) scale(1.08); }
-  66%      { transform: translate(-22px, 18px) scale(0.94); }
-}
-
-/* a quiet shimmer for the live skeleton/loading bars in the product mock */
-.pl-shimmer {
-  background: linear-gradient(90deg, hsl(252 24% 94%) 0%, hsl(252 24% 97%) 50%, hsl(252 24% 94%) 100%);
-  background-size: 200% 100%; animation: pl-shimmer 1.8s ease-in-out infinite;
-}
-@keyframes pl-shimmer { to { background-position: -200% 0; } }
 
 @media (prefers-reduced-motion: reduce) {
   .plumeo *, .plumeo *::before, .plumeo *::after {
     animation: none !important;
     transition-duration: 0.001ms !important;
   }
+  .pl-underline path { stroke-dashoffset: 0 !important; }
 }
