@@ -105,126 +105,141 @@
 }
 
 /* ---- Plumeo landing -----------------------------------------------------
-   The app itself runs dark (<html class="dark"> in layout.tsx). The marketing
-   page wants the opposite, so everything here lives under .plumeo and just
-   re-points the theme tokens to a light, plum + coral palette. Nothing here
-   touches the dashboards. Palette stays off black and off green on purpose. */
-.plumeo {
+   The app runs dark (<html class="dark"> in layout.tsx); the marketing page is
+   the opposite. Everything is scoped to .plumeo so the dashboards are untouched.
+   White canvas, slate-violet ink, a refined violet light system used as glow and
+   gradient accents (not flat fills). Motion is handled in TSX via Framer Motion;
+   this file owns the surfaces, gradients and texture. */
+
+/* register the conic angle so the animated gradient borders can tween smoothly */
+@property --pl-a { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+
+/* token scope — applied to the page root AND the portal-less modal so both share
+   the palette. kept free of layout props so it never fights utilities. */
+.plumeo, .pl-scope {
   --background: 0 0% 100%;
-  --foreground: 263 34% 13%;          /* deep plum-ink, not pure black */
+  --foreground: 252 24% 11%;          /* near-black with a violet undertone */
   --card: 0 0% 100%;
-  --card-foreground: 263 34% 13%;
+  --card-foreground: 252 24% 11%;
   --popover: 0 0% 100%;
-  --popover-foreground: 263 34% 13%;
-  --primary: 264 82% 57%;             /* plum / violet — the "Plum" in Plumeo */
+  --popover-foreground: 252 24% 11%;
+  --primary: 256 68% 54%;             /* the violet accent */
   --primary-foreground: 0 0% 100%;
-  --secondary: 264 44% 97%;
-  --secondary-foreground: 263 34% 13%;
-  --muted: 264 40% 97%;
-  --muted-foreground: 263 12% 42%;
-  --accent: 264 46% 96%;
-  --accent-foreground: 263 34% 13%;
-  --border: 264 28% 91%;
-  --input: 264 28% 91%;
-  --ring: 264 82% 57%;
+  --secondary: 252 30% 98%;
+  --secondary-foreground: 252 24% 11%;
+  --muted: 252 24% 97%;
+  --muted-foreground: 252 8% 42%;
+  --accent: 252 30% 96%;
+  --accent-foreground: 252 24% 11%;
+  --border: 252 16% 90%;
+  --input: 252 16% 90%;
+  --ring: 256 68% 54%;
 
-  /* extra brand tones the components reach for directly */
-  --plum: 264 82% 57%;
-  --coral: 8 90% 65%;
-  --peri: 245 80% 67%;
-  --grape: 286 70% 60%;
+  /* gradient stops reused across glows, text and borders */
+  --g1: 256 72% 58%;   /* violet  */
+  --g2: 232 84% 60%;   /* indigo  */
+  --g3: 288 70% 62%;   /* orchid  */
 
+  color: hsl(252 24% 11%);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* page-root-only layout (NOT on the modal, or it would cover the scrim) */
+.plumeo {
   background: #fff;
-  color: hsl(263 34% 13%);
   position: relative;
   overflow-x: hidden;
+  letter-spacing: -0.012em;
 }
 
-/* soft coloured glow behind the hero, plus a faint grid that fades out downward */
-.pl-aurora {
-  background:
-    radial-gradient(38% 46% at 16% 6%,  hsl(264 82% 62% / 0.18), transparent 62%),
-    radial-gradient(36% 42% at 84% 4%,  hsl(8 90% 66% / 0.16),  transparent 62%),
-    radial-gradient(44% 50% at 72% 96%, hsl(245 80% 68% / 0.12), transparent 62%),
-    radial-gradient(40% 44% at 10% 92%, hsl(286 70% 66% / 0.10), transparent 62%);
+.plumeo h1, .plumeo h2, .plumeo h3 { letter-spacing: -0.03em; }
+
+/* fine film grain over the whole page for a premium, non-flat surface */
+.pl-noise::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+
+/* contained aurora — soft animated colour light, kept low so white still wins */
+.pl-aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.pl-aurora > i {
+  position: absolute; display: block; border-radius: 9999px; filter: blur(70px);
+  opacity: 0.55; will-change: transform; animation: pl-drift var(--d, 22s) ease-in-out infinite;
+}
+
+/* faint grid that dissolves toward the edges */
 .pl-grid {
   background-image:
-    linear-gradient(to right, hsl(264 30% 84% / 0.55) 1px, transparent 1px),
-    linear-gradient(to bottom, hsl(264 30% 84% / 0.55) 1px, transparent 1px);
-  background-size: 60px 60px;
-  -webkit-mask-image: radial-gradient(ellipse 78% 60% at 50% 0%, #000 22%, transparent 72%);
-          mask-image: radial-gradient(ellipse 78% 60% at 50% 0%, #000 22%, transparent 72%);
-}
-.pl-blob {
-  position: absolute; border-radius: 9999px; filter: blur(72px);
-  pointer-events: none; will-change: transform; animation: pl-drift 20s ease-in-out infinite;
+    linear-gradient(to right, hsl(252 16% 86% / 0.55) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(252 16% 86% / 0.55) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(115% 75% at 50% 0%, #000 0%, transparent 60%);
+          mask-image: radial-gradient(115% 75% at 50% 0%, #000 0%, transparent 60%);
 }
 
-/* plum→coral gradient text for the highlight words */
-.pl-grad-text {
-  background: linear-gradient(102deg, hsl(264 82% 60%) 0%, hsl(286 72% 60%) 38%, hsl(8 90% 65%) 100%);
-  background-size: 200% auto;
+/* dotted texture variant used behind some panels */
+.pl-dots {
+  background-image: radial-gradient(hsl(252 20% 80% / 0.6) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(80% 80% at 50% 50%, #000, transparent 75%);
+          mask-image: radial-gradient(80% 80% at 50% 50%, #000, transparent 75%);
+}
+
+.pl-accent { color: hsl(var(--g1)); }
+
+/* the brand gradient as text fill — used on a single highlight word, not everywhere */
+.pl-grad {
+  background-image: linear-gradient(100deg, hsl(var(--g1)), hsl(var(--g2)) 46%, hsl(var(--g3)));
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
-  animation: pl-shimmer 8s linear infinite;
 }
 
-/* thin gradient hairline used as section dividers / connectors */
-.pl-rule { background: linear-gradient(90deg, transparent, hsl(264 50% 80%), transparent); }
-
-/* scroll reveal — JS flips on .pl-in when the element enters the viewport */
-.pl-reveal {
-  opacity: 0; transform: translateY(28px);
-  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
-  transition-delay: var(--rd, 0ms);
+/* animated conic gradient hairline border (draws a rotating light around a card) */
+.pl-gborder { position: relative; isolation: isolate; }
+.pl-gborder::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; z-index: -1;
+  background: conic-gradient(from var(--pl-a), hsl(var(--g1)), hsl(var(--g2)), hsl(var(--g3)), hsl(var(--g1)));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: pl-rotate 8s linear infinite;
 }
-.pl-reveal.pl-in { opacity: 1; transform: none; }
 
-/* the tilted product shot. the scene holds the perspective, the card does the
-   rotation, and it eases closer to flat when you hover it. */
-.pl-scene { perspective: 1600px; }
-.pl-tilt {
-  transform: rotateX(9deg) rotateY(-13deg) rotate(0.5deg);
-  transform-style: preserve-3d;
-  transition: transform 0.7s cubic-bezier(0.16,1,0.3,1);
+/* cursor spotlight on cards — JS feeds --mx / --my from the pointer */
+.pl-spot { position: relative; }
+.pl-spot::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; opacity: 0;
+  transition: opacity 0.35s ease; pointer-events: none;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), hsl(var(--g1) / 0.10), transparent 70%);
 }
-.pl-scene:hover .pl-tilt { transform: rotateX(3deg) rotateY(-4deg); }
+.pl-spot:hover::before { opacity: 1; }
 
-.pl-float  { animation: pl-float 7s ease-in-out infinite; }
-.pl-float2 { animation: pl-float 6s ease-in-out infinite; animation-delay: -2.5s; }
+/* soft elevation tiers */
+.pl-shadow-sm { box-shadow: 0 1px 2px hsl(252 24% 11% / 0.04), 0 8px 24px -16px hsl(252 30% 20% / 0.18); }
+.pl-shadow-lg { box-shadow: 0 2px 8px hsl(252 24% 11% / 0.05), 0 40px 90px -50px hsl(256 60% 30% / 0.45); }
 
-/* cards rise a little and warm their shadow on hover */
-.pl-lift { transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s ease, border-color 0.3s ease; }
-.pl-lift:hover { transform: translateY(-6px); }
-
-/* infinite marquee, pauses when you point at it */
-.pl-marquee-track { display: inline-flex; white-space: nowrap; animation: pl-marquee 38s linear infinite; }
+/* keyword marquee */
+.pl-marquee-track { display: inline-flex; white-space: nowrap; animation: pl-marquee 40s linear infinite; }
 .pl-marquee:hover .pl-marquee-track { animation-play-state: paused; }
 
-/* the feather strokes draw themselves in on load */
-.pl-draw path { stroke-dasharray: 1; stroke-dashoffset: 1; pathLength: 1; animation: pl-draw 1.6s 0.3s cubic-bezier(0.16,1,0.3,1) forwards; }
-
-.pl-blink { animation: pl-blink 1.9s ease-in-out infinite; }
-
-@keyframes pl-float   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-13px); } }
-@keyframes pl-shimmer { to { background-position: 200% center; } }
+@keyframes pl-rotate  { to { --pl-a: 360deg; } }
 @keyframes pl-marquee { to { transform: translateX(-50%); } }
-@keyframes pl-draw    { to { stroke-dashoffset: 0; } }
-@keyframes pl-blink   { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 @keyframes pl-drift {
-  0%,100% { transform: translate(0,0) scale(1); }
-  33%     { transform: translate(26px,-20px) scale(1.07); }
-  66%     { transform: translate(-20px,16px) scale(0.95); }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(30px, -22px) scale(1.08); }
+  66%      { transform: translate(-22px, 18px) scale(0.94); }
 }
 
-/* honour reduced-motion: drop the animation, keep everything visible */
+/* a quiet shimmer for the live skeleton/loading bars in the product mock */
+.pl-shimmer {
+  background: linear-gradient(90deg, hsl(252 24% 94%) 0%, hsl(252 24% 97%) 50%, hsl(252 24% 94%) 100%);
+  background-size: 200% 100%; animation: pl-shimmer 1.8s ease-in-out infinite;
+}
+@keyframes pl-shimmer { to { background-position: -200% 0; } }
+
 @media (prefers-reduced-motion: reduce) {
   .plumeo *, .plumeo *::before, .plumeo *::after {
     animation: none !important;
     transition-duration: 0.001ms !important;
   }
-  .pl-reveal { opacity: 1 !important; transform: none !important; }
-  .pl-tilt { transform: none !important; }
-  .pl-draw path { stroke-dashoffset: 0 !important; }
 }
