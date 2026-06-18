@@ -344,10 +344,11 @@ function HeroScene() {
         </div>
       </motion.div>
 
-      {/* teammates (mid depth) */}
-      <FloatAvatar variant="employee" className="-left-5 -top-6 size-[72px]" mx={mx} my={my} depth={26} delay={0.5} />
-      <FloatAvatar variant="manager" className="-right-6 top-16 size-[60px]" mx={mx} my={my} depth={34} delay={0.65} />
-      <FloatAvatar variant="admin" className="-bottom-5 left-20 size-[58px]" mx={mx} my={my} depth={30} delay={0.8} />
+      {/* teammates (mid depth) — the top-left one is hidden on phones so it
+          doesn't clip the card header */}
+      <FloatAvatar variant="employee" className="-left-5 -top-6 hidden size-[72px] sm:block" mx={mx} my={my} depth={26} delay={0.5} />
+      <FloatAvatar variant="manager" className="-right-4 top-16 size-[56px] sm:-right-6 sm:size-[60px]" mx={mx} my={my} depth={34} delay={0.65} />
+      <FloatAvatar variant="admin" className="-bottom-5 left-16 size-[54px] sm:left-20 sm:size-[58px]" mx={mx} my={my} depth={30} delay={0.8} />
 
       {/* floating chips (deepest) */}
       <motion.div style={{ x: chip1X, y: chip1Y }}
@@ -366,7 +367,7 @@ function HeroScene() {
       <motion.div style={{ x: chip2X, y: chip2Y }}
         initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
         transition={{ duration: 0.6, ease: EASE, delay: 1.05 }}
-        className="pl-float absolute -left-4 bottom-24 flex items-center gap-2 rounded-xl border border-border bg-white px-3 py-2 pl-shadow-lg">
+        className="pl-float absolute -left-4 bottom-24 hidden items-center gap-2 rounded-xl border border-border bg-white px-3 py-2 pl-shadow-lg sm:flex">
         <span className="grid size-6 place-items-center rounded-full" style={{ background: C.gold }}><Check className="size-3.5 text-white" /></span>
         <span className="text-[11.5px] font-semibold" style={{ color: C.ink }}>Sheet approved</span>
       </motion.div>
