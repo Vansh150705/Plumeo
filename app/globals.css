@@ -6,31 +6,32 @@
 
 @layer base {
   :root {
-    /* Light theme — refined editorial */
-    --background: 30 20% 98%;
-    --foreground: 20 14% 12%;
+    /* Plumeo theme — deep navy ink + soft gold on white (matches landing) */
+    --background: 0 0% 100%;
+    --foreground: 218 54% 14%;        /* deep navy ink */
     --card: 0 0% 100%;
-    --card-foreground: 20 14% 12%;
+    --card-foreground: 218 54% 14%;
     --popover: 0 0% 100%;
-    --popover-foreground: 20 14% 12%;
-    --primary: 39 88% 55%;            /* warm gold #f0b429 */
-    --primary-foreground: 20 14% 8%;
-    --secondary: 30 8% 95%;
-    --secondary-foreground: 20 14% 12%;
-    --muted: 30 8% 95%;
-    --muted-foreground: 20 6% 45%;
-    --accent: 30 8% 92%;
-    --accent-foreground: 20 14% 12%;
-    --destructive: 0 84% 60%;
+    --popover-foreground: 218 54% 14%;
+    --primary: 218 56% 16%;           /* navy — primary buttons / accents */
+    --primary-foreground: 40 56% 97%;
+    --secondary: 40 38% 96%;          /* warm cream surface */
+    --secondary-foreground: 218 54% 14%;
+    --muted: 40 24% 96%;
+    --muted-foreground: 218 14% 42%;
+    --accent: 40 36% 94%;
+    --accent-foreground: 218 54% 14%;
+    --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 30 8% 88%;
-    --input: 30 8% 88%;
-    --ring: 39 88% 55%;
+    --border: 218 20% 90%;
+    --input: 218 20% 90%;
+    --ring: 38 56% 46%;               /* gold focus ring */
+    --gold: 38 56% 46%;               /* soft-gold accent */
     --radius: 0.75rem;
 
     --font-geist: 'Geist', system-ui, sans-serif;
     --font-geist-mono: 'Geist Mono', ui-monospace, monospace;
-    --font-instrument: 'Instrument Serif', serif;
+    --font-instrument: 'Fraunces', Georgia, serif;
   }
 
   .dark {
