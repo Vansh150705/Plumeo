@@ -149,9 +149,19 @@ export function LandingClient() {
               <a key={href} href={href} className="text-[14px] text-muted-foreground transition-colors hover:text-foreground">{label}</a>
             ))}
           </nav>
-          <div className="flex items-center gap-3">
-            <button onClick={openDirectory} className="hidden text-[14px] text-muted-foreground transition-colors hover:text-foreground sm:inline">Sign in</button>
-            <button onClick={openDirectory} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[13.5px] font-medium text-primary-foreground transition-colors hover:bg-[hsl(218_52%_22%)]">Get started</button>
+          <div className="flex items-center gap-1.5">
+            <a href={GH} target="_blank" rel="noreferrer" aria-label="View on GitHub"
+              className="hidden size-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:grid">
+              <Github className="size-[18px]" />
+            </a>
+            <button onClick={openDirectory}
+              className="hidden h-9 items-center rounded-lg px-3 text-[14px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:inline-flex">
+              Sign in
+            </button>
+            <button onClick={openDirectory}
+              className="group inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary pl-4 pr-3.5 text-[13.5px] font-medium text-primary-foreground pl-shadow-sm transition-colors hover:bg-[hsl(218_52%_22%)]">
+              Get started <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+            </button>
           </div>
         </div>
       </header>
@@ -966,6 +976,8 @@ function FooterCol({ title, links }: { title: string; links: [string, string][] 
 /* ===================================================================== */
 /*  Content                                                              */
 /* ===================================================================== */
+
+const GH = 'https://github.com/Vansh150705/Plumeo';
 
 const NAV: [string, string][] = [
   ['Features', '#features'], ['How it works', '#how'], ['For teams', '#teams'],
