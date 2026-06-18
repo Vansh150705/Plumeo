@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui/avatar';
 import {
   LayoutDashboard, Target, ClipboardCheck, Bell, Users, Settings,
-  BarChart3, GitBranch, Building2, ScrollText, FileSpreadsheet, LogOut,
+  BarChart3, GitBranch, Building2, ScrollText, FileSpreadsheet, LogOut, Feather,
 } from 'lucide-react';
 import type { AppUser } from '@/lib/types';
 import { signOut } from '@/lib/auth';
@@ -19,11 +19,11 @@ export function SidebarNav({ user }: { user: AppUser }) {
   return (
     <aside className="w-60 shrink-0 border-r border-border bg-card/50 backdrop-blur-sm flex flex-col">
       <div className="px-5 py-5 flex items-center gap-2.5">
-        <div className="size-8 rounded-lg bg-primary/15 border border-primary/30 grid place-items-center">
-          <span className="font-serif text-primary text-xl leading-none">A</span>
+        <div className="size-8 rounded-lg bg-primary grid place-items-center">
+          <Feather className="size-[18px]" style={{ color: 'hsl(var(--gold))' }} />
         </div>
         <div>
-          <div className="font-semibold text-sm tracking-tight">AtomQuest</div>
+          <div className="font-display text-[15px] font-medium tracking-tight">Plumeo</div>
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{user.role}</div>
         </div>
       </div>
