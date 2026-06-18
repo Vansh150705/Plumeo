@@ -4,8 +4,8 @@ import { NavigationProgress } from '@/components/navigation-progress';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Plumeo — A lighter way to set & track goals',
-  description: 'Plumeo runs the whole goal lifecycle — drafting, manager approval, quarterly check-ins, and an audit trail that never forgets. Built on Next.js, Supabase, and Vercel.',
+  title: 'Plumeo · A lighter way to set & track goals',
+  description: 'Plumeo runs the whole goal lifecycle: drafting, manager approval, quarterly check-ins, and an audit trail that never forgets. Built on Next.js, Supabase, and Vercel.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -204,9 +204,9 @@ function Hero({ onStart }: { onStart: () => void }) {
           </motion.h1>
 
           <motion.p variants={item} className="mt-7 max-w-md text-[16.5px] leading-relaxed text-muted-foreground">
-            Plumeo runs the whole goal lifecycle — drafting, manager approval,
-            quarterly check-ins, and an audit trail that never forgets — in one
-            calm, beautifully simple place.
+            Plumeo runs the whole goal lifecycle: drafting, manager approval,
+            quarterly check-ins, and an audit trail that never forgets, all in
+            one calm, beautifully simple place.
           </motion.p>
 
           <motion.div variants={item} className="mt-9 flex flex-wrap items-center gap-3">
@@ -261,7 +261,7 @@ function HeroScene() {
   }
   function leave() { mx.set(0); my.set(0); }
 
-  // depth layers — each element shifts by a different amount for a parallax feel
+  // depth layers: each element shifts by a different amount for a parallax feel
   const cardX = useTransform(mx, [-1, 1], [-10, 10]);
   const cardY = useTransform(my, [-1, 1], [-10, 10]);
   const chip1X = useTransform(mx, [-1, 1], [-44, 44]);
@@ -507,7 +507,7 @@ function Features() {
 }
 
 /* ===================================================================== */
-/*  Analytics — animated data viz                                        */
+/*  Analytics: animated data viz                                         */
 /* ===================================================================== */
 
 function Analytics() {
@@ -646,7 +646,7 @@ function HowItWorks() {
   return (
     <section id="how" className="mx-auto max-w-6xl px-5 py-24 md:px-8 md:py-28">
       <SectionHead kicker="How it works" title={<>Three roles,<br />one source of truth.</>}
-        sub="Every goal travels the same disciplined path — and nothing important happens off the record." />
+        sub="Every goal travels the same disciplined path, and nothing important happens off the record." />
       <div className="relative mt-16 grid gap-10 md:grid-cols-3">
         <motion.div initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }}
           transition={{ duration: 1.1, ease: EASE }} className="absolute left-[16%] right-[16%] top-7 hidden h-px origin-left md:block" style={{ background: C.gold, opacity: 0.4 }} />
@@ -740,7 +740,7 @@ function Testimonial() {
         <Reveal>
           <Quote className="mx-auto size-8" style={{ color: C.gold }} />
           <p className="mt-6 font-display text-[1.7rem] font-medium leading-[1.35] md:text-[2.1rem]">
-            &ldquo;Reviews that used to take a week of spreadsheet wrangling now close in an afternoon —
+            &ldquo;Reviews that used to take a week of spreadsheet wrangling now close in an afternoon,
             and for the first time, everyone trusts the numbers.&rdquo;
           </p>
           <div className="mt-7 flex items-center justify-center gap-3">
@@ -820,7 +820,7 @@ function FinalCTA({ onStart }: { onStart: () => void }) {
               <br />into the light.
             </h2>
             <p className="mx-auto mt-4 max-w-md text-[15px] text-muted-foreground">
-              Pre-seeded accounts across every role and workflow state. One click each — no password.
+              Pre-seeded accounts across every role and workflow state. One click each, no password.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <PrimaryButton onClick={onStart}>Open the demo <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" /></PrimaryButton>
@@ -867,7 +867,7 @@ function Footer() {
 }
 
 /* ===================================================================== */
-/*  Sign-in modal — real Entra flow                                     */
+/*  Sign-in modal: real Entra flow                                      */
 /* ===================================================================== */
 
 function SignInModal({ directory, pending, loadingOid, onPick, onClose }: {
@@ -890,7 +890,7 @@ function SignInModal({ directory, pending, loadingOid, onPick, onClose }: {
           <span className="grid size-7 shrink-0 place-items-center rounded text-[10px] font-bold text-white" style={{ background: C.navy }}>MS</span>
           <div>
             <div className="text-[14px] font-semibold">Sign in to Plumeo</div>
-            <div className="text-[11px] text-muted-foreground">Pick a demo account — no password</div>
+            <div className="text-[11px] text-muted-foreground">Pick a demo account, no password</div>
           </div>
           <button onClick={onClose} aria-label="Close" className="ml-auto grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"><X className="size-4" /></button>
         </div>
@@ -918,7 +918,7 @@ function SignInModal({ directory, pending, loadingOid, onPick, onClose }: {
           </div>
         </div>
         <div className="border-t border-border px-4 py-3 text-[11px] leading-relaxed text-muted-foreground" style={{ background: C.cream }}>
-          <span className="font-medium text-foreground">Mocked for demo —</span> the response mirrors Microsoft Graph{' '}
+          <span className="font-medium text-foreground">Mocked for demo.</span> The response mirrors Microsoft Graph{' '}
           <code className="rounded bg-accent px-1 py-0.5 font-mono text-foreground">/me</code>; roles come from group membership.
         </div>
       </motion.div>
@@ -978,11 +978,11 @@ const RAIL = [
 
 const FEATURES = [
   { icon: FileCheck, title: 'A lifecycle with real gates', desc: 'Draft, submit, approve, lock. Every change after lock lands in the audit log with a before/after diff.' },
-  { icon: ShieldCheck, title: 'L1 approval that works', desc: 'Managers inline-edit, return for rework, or approve and lock — a real review flow, not a rubber stamp.' },
+  { icon: ShieldCheck, title: 'L1 approval that works', desc: 'Managers inline-edit, return for rework, or approve and lock. A real review flow, not a rubber stamp.' },
   { icon: Users, title: 'Shared goals, one push', desc: 'Cascade a department KPI to many reports at once. Weightage adjustable, target kept in sync.' },
-  { icon: Target, title: 'Four scoring models', desc: 'Numeric, percentage, timeline, zero-based — each with its own formula, validated twice.' },
+  { icon: Target, title: 'Four scoring models', desc: 'Numeric, percentage, timeline, zero-based; each with its own formula, validated twice.' },
   { icon: BarChart3, title: 'Analytics that land', desc: 'Quarter-over-quarter trends, distribution by thrust area, and manager effectiveness.' },
-  { icon: Bell, title: 'Notifications that reach', desc: 'Email, Teams, and in-app — fired on every lifecycle event and deep-linked back into the sheet.' },
+  { icon: Bell, title: 'Notifications that reach', desc: 'Email, Teams, and in-app, fired on every lifecycle event and deep-linked back into the sheet.' },
   { icon: GitBranch, title: 'Rule-based escalations', desc: 'Configurable thresholds on stale approvals, routed up the org hierarchy automatically.' },
   { icon: Lock, title: 'An audit trail that lasts', desc: 'Who changed what and when, with a before/after JSON diff and one-click CSV export.' },
 ];
@@ -1000,8 +1000,8 @@ const ROLES = [
 ];
 
 const FAQS = [
-  { q: 'How are goal scores calculated?', a: 'Each goal uses one of four unit-of-measure formulas — numeric, percentage, timeline, or zero-based — and contributes to a weighted sheet score. Everything is recomputed on the server on every check-in, so the number you see is always authoritative.' },
+  { q: 'How are goal scores calculated?', a: 'Each goal uses one of four unit-of-measure formulas (numeric, percentage, timeline, or zero-based) and contributes to a weighted sheet score. Everything is recomputed on the server on every check-in, so the number you see is always authoritative.' },
   { q: 'Who can see and change what?', a: 'Access is enforced at the database row level. Employees see their own sheet, managers see their reports, and HR/admins see the whole org. Once a sheet is locked, every change is recorded in an immutable audit log.' },
   { q: 'Can a goal be shared across a team?', a: 'Yes. A manager or admin can push one KPI to many reports in a single action. The target stays in sync across everyone, while each recipient can still adjust their own weightage.' },
-  { q: 'Does it really run for free?', a: 'On the Vercel and Supabase free tiers, Plumeo comfortably supports a small organisation at zero monthly cost — serverless functions, Postgres, and auth included.' },
+  { q: 'Does it really run for free?', a: 'On the Vercel and Supabase free tiers, Plumeo comfortably supports a small organisation at zero monthly cost, with serverless functions, Postgres, and auth included.' },
 ];
