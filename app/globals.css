@@ -167,10 +167,36 @@
 /* keyword rail */
 .pl-marquee-track { display: inline-flex; white-space: nowrap; animation: pl-marquee 46s linear infinite; }
 .pl-marquee:hover .pl-marquee-track { animation-play-state: paused; }
+.pl-marquee-rev .pl-marquee-track { animation-direction: reverse; }
+
+/* fine neutral grain over the page — adds a premium, non-flat surface (no colour) */
+.pl-grain::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.022;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* contained dot-grid (used behind illustration panels, never the page bg) */
+.pl-dotgrid {
+  background-image: radial-gradient(hsl(218 28% 66% / 0.5) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* a slow gold light sweep across a card on hover — the one premium flourish */
+.pl-sheen { position: relative; overflow: hidden; }
+.pl-sheen::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(120deg, transparent 36%, hsl(var(--gold) / 0.14) 50%, transparent 64%);
+  transform: translateX(-130%); transition: transform 0.9s cubic-bezier(0.22,1,0.36,1);
+}
+.pl-sheen:hover::after { transform: translateX(130%); }
+
+/* slow rotation for the decorative dashed orbit in the hero */
+.pl-spin-slow { animation: pl-spin 42s linear infinite; }
 
 @keyframes pl-draw   { to { stroke-dashoffset: 0; } }
 @keyframes pl-float  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 @keyframes pl-marquee { to { transform: translateX(-50%); } }
+@keyframes pl-spin   { to { transform: rotate(360deg); } }
 
 @media (prefers-reduced-motion: reduce) {
   .plumeo *, .plumeo *::before, .plumeo *::after {
