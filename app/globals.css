@@ -102,7 +102,7 @@
   .pill-purple { @apply bg-purple-500/10 text-purple-400; }
   .pill-orange { @apply bg-orange-500/10 text-orange-400; }
   .pill-gray   { @apply bg-muted text-muted-foreground; }
-  .pill-gold   { @apply bg-primary/15 text-primary; }
+  .pill-gold   { background: hsl(var(--gold) / 0.15); color: hsl(var(--gold)); }
 }
 
 /* ---- Plumeo landing -----------------------------------------------------
