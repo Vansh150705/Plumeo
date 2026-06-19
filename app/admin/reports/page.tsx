@@ -90,7 +90,7 @@ export default async function ReportsPage() {
                 <div className="flex-1">
                   <div className="text-base font-medium mb-1">Audit export</div>
                   <div className="text-sm text-muted-foreground mb-3">
-                    Full audit trail — who changed what, when. Useful for compliance reviews.
+                    The full audit trail of who changed what and when. Handy for compliance reviews.
                   </div>
                   <Button asChild variant="secondary">
                     <a href="/api/reports/audit" download>
@@ -144,7 +144,7 @@ export default async function ReportsPage() {
                           <span className="font-mono text-[11px] tabular-nums w-9">{r.checkinCompletion}%</span>
                         </div>
                       </td>
-                      <td className="px-4 py-2.5 font-mono tabular-nums">{r.score ?? '—'}</td>
+                      <td className="px-4 py-2.5 font-mono tabular-nums">{r.score ?? '·'}</td>
                     </tr>
                   ))}
                 </tbody>

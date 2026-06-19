@@ -54,7 +54,7 @@ export function EscalationsClient({
         <Card className="border-emerald-500/30 bg-emerald-500/5">
           <CardContent className="p-3 flex items-center gap-2 text-sm">
             <CheckCircle2 className="size-4 text-emerald-400" />
-            Sweep complete — {lastSweep.triggered} escalation{lastSweep.triggered === 1 ? '' : 's'} triggered.
+            Sweep complete. {lastSweep.triggered} escalation{lastSweep.triggered === 1 ? '' : 's'} triggered.
             <span className="text-muted-foreground text-xs ml-auto">{fmtRelative(lastSweep.at)}</span>
           </CardContent>
         </Card>

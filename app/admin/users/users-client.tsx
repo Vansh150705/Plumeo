@@ -91,7 +91,7 @@ export function UsersClient({ users }: { users: (AppUser & { manager_name: strin
                       <Pill variant={u.role === 'Admin' ? 'purple' : u.role === 'Manager' ? 'blue' : 'gray'}>{u.role}</Pill>
                     </td>
                     <td className="px-4 py-2.5 text-muted-foreground">{u.department}</td>
-                    <td className="px-4 py-2.5 text-muted-foreground">{u.manager_name ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-muted-foreground">{u.manager_name ?? '·'}</td>
                     <td className="px-4 py-2.5">
                       <div className="flex flex-wrap gap-1">
                         {(u.entra_groups ?? []).slice(0, 3).map(g => (

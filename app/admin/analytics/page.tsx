@@ -18,7 +18,7 @@ export default async function AdminAnalytics() {
     .select('*')
     .in('goal_id', allGoalIds.length ? allGoalIds : ['00000000-0000-0000-0000-000000000000']);
 
-  // QoQ avg score — across whole org
+  // average score per quarter, across the whole org
   const qoqData = (['Q1', 'Q2', 'Q3', 'Q4'] as const).map(q => {
     const cisForQ = (checkIns ?? []).filter(c => c.quarter === q);
     let sum = 0, total = 0;
@@ -75,7 +75,7 @@ export default async function AdminAnalytics() {
     }
   }
 
-  // Manager effectiveness — check-in completion rate per manager's team
+  // manager effectiveness: what share of expected check-ins each team captured
   const managers = (users ?? []).filter(u => u.role === 'Manager');
   const mgrData = managers.map(m => {
     const team = (users ?? []).filter(u => u.manager_id === m.id);
