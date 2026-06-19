@@ -133,23 +133,6 @@ export function computeScore(
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
-/** Sheet-level weighted score across goals that have computable scores. */
-export function computeSheetScore(
-  goals: (Goal & { check_in?: Pick<CheckIn, 'actual_numeric' | 'actual_date' | 'zero_achieved'> | null })[],
-): { score: number | null; coverage: number } {
-  let weightedSum = 0;
-  let weightedTotal = 0;
-  for (const g of goals) {
-    if (!g.check_in) continue;
-    const s = computeScore(g, g.check_in);
-    if (s == null) continue;
-    weightedSum += s * g.weightage;
-    weightedTotal += g.weightage;
-  }
-  if (weightedTotal === 0) return { score: null, coverage: 0 };
-  return { score: weightedSum / weightedTotal, coverage: weightedTotal };
-}
-
 // which quarter (if any) is open for check-ins right now
 export type CycleWindows = {
   goal_window_start: string;
