@@ -1,139 +1,107 @@
-# AtomQuest Goal Setting & Tracking Portal
+# Plumeo
 
-**Built for AtomQuest Hackathon 2026.** A production-quality web portal for goal lifecycle management — creation, alignment, quarterly check-ins, and audit-ready visibility. Three roles, two phases, four bonus features, zero hosting cost.
+A lighter, more human way to set, align, and track goals across a whole team.
+Plumeo runs the full goal lifecycle: drafting, manager approval, quarterly
+check-ins, and an audit trail that never forgets, all in one calm place.
 
-[![Vercel](https://img.shields.io/badge/Hosted%20on-Vercel-000?style=for-the-badge&logo=vercel)](https://atomquest-goals.vercel.app)
+[![Vercel](https://img.shields.io/badge/Hosted%20on-Vercel-000?style=for-the-badge&logo=vercel)](https://plumeo-ai.vercel.app)
 [![Supabase](https://img.shields.io/badge/Database-Supabase-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com)
-[![Next.js](https://img.shields.io/badge/Framework-Next.js%2014-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/Framework-Next.js-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
+
+**Live demo:** https://plumeo-ai.vercel.app
 
 ---
 
-## 🚀 Live demo
+## Try it
 
-**URL:** https://atomquest-goals-gray.vercel.app/
+The landing page has one-click sign-in for seven pre-seeded demo accounts, so you
+can explore every role and workflow state without typing a password.
 
-**Three one-click logins on the landing page** — no password entry required.
+| Role | Name | Email |
+|------|------|-------|
+| Admin / HR | Priya Shah | `priya.shah@plumeo.io` |
+| Manager (Sales) | Arjun Mehta | `arjun.mehta@plumeo.io` |
+| Manager (Eng) | Lakshmi Raman | `lakshmi.r@plumeo.io` |
+| Employee (Sales, Draft sheet) | Rohan Kapoor | `rohan.k@plumeo.io` |
+| Employee (Sales, Submitted) | Neha Iyer | `neha.iyer@plumeo.io` |
+| Employee (Eng, Approved + check-ins) | Kabir Malhotra | `kabir.malhotra@plumeo.io` |
+| Employee (Eng, Returned for rework) | Ananya Sharma | `ananya.s@plumeo.io` |
 
-| Role | Name | Email | Password (if needed) |
-|------|------|-------|----------------------|
-| 🔐 Admin / HR | Priya Shah | `priya.shah@atomquest.io` | `demo-aad-9001` |
-| 👔 Manager (L1) — Sales | Arjun Mehta | `arjun.mehta@atomquest.io` | `demo-aad-9002` |
-| 👔 Manager (L1) — Eng | Lakshmi Raman | `lakshmi.r@atomquest.io` | `demo-aad-9003` |
-| 👤 Employee — Sales | Rohan Kapoor (Draft sheet) | `rohan.k@atomquest.io` | `demo-aad-9004` |
-| 👤 Employee — Sales | Neha Iyer (Submitted, awaiting approval) | `neha.iyer@atomquest.io` | `demo-aad-9005` |
-| 👤 Employee — Eng | Kabir Malhotra (Approved + Q1/Q2 check-ins) | `kabir.malhotra@atomquest.io` | `demo-aad-9006` |
-| 👤 Employee — Eng | Ananya Sharma (Returned for rework) | `ananya.s@atomquest.io` | `demo-aad-9007` |
-
-> The demo directory mirrors what Microsoft Graph would return. Picking a tile signs you in instantly — the same flow that runs after a real Entra OAuth callback.
-
----
-
-## 🎯 What's inside (BRD coverage)
-
-### Phase 1 — Goal creation & approval *(BRD §2.1)*
-- ✅ Thrust area + title + description + UoM (Numeric / % / Timeline / Zero-based)
-- ✅ All four scoring formulas implemented exactly per spec (`lib/goals.ts`)
-- ✅ Weightage validation: total = 100%, min 10% per goal, max 8 goals — enforced both client- and server-side
-- ✅ Manager (L1) approval workflow: inline edit · return for rework · approve & lock
-- ✅ Shared goals: manager/admin pushes one goal to N reports in a single action; weightage adjustable on recipient, title/target locked
-- ✅ Owner's achievement syncs to all linked recipient sheets (shared_origin_id lineage)
-
-### Phase 2 — Tracking & check-ins *(BRD §2.2, §2.3)*
-- ✅ Quarterly Planned vs Actual capture (one row per goal per quarter)
-- ✅ Status: Not Started / On Track / At Risk / Completed
-- ✅ Manager check-in comments with structured log
-- ✅ Quarter windows enforced (Q1 July · Q2 Oct · Q3 Jan · Q4 Mar-Apr)
-- ✅ Live weighted sheet score recomputed on every check-in save
-
-### Cross-cutting *(BRD §3, §4)*
-- ✅ Role-based access (RLS at the database layer)
-- ✅ Immutable audit log — every action after lock captured with before/after snapshots
-- ✅ CSV export: achievement report + audit log
-- ✅ Completion dashboard with sheet status × check-in coverage per employee
-
-### 🌟 Bonus features *(BRD §5 — all four)*
-- ✅ **Microsoft Entra ID SSO** — mocked IdP with the same response shape as Microsoft Graph `/me`. Roles derived from group membership (`HR-Admins` → Admin, `Managers-L1` → Manager). Manager hierarchy synced from Entra's `manager` attribute. *Swap to real Entra: one HTTP call.*
-- ✅ **Email + MS Teams notifications** — every lifecycle event fans out across three channels (Email, Teams, InApp). Adaptive-card-style payloads. Deep links into the portal.
-- ✅ **Rule-based escalation module** — admin-configurable rules ("approval pending 7+ days → notify manager", "approval pending 14+ days → escalate to HR"). Vercel cron runs nightly sweep; admin can also run on-demand.
-- ✅ **Analytics dashboard** — Recharts visualisations: QoQ trends, goal distribution by thrust area, UoM type breakdown, department × quarter heatmap, manager effectiveness comparison.
+The directory mirrors what Microsoft Graph would return; picking a tile signs you
+in instantly, the same way it would after a real Entra OAuth callback.
 
 ---
 
-## 🏗️ Architecture
+## What's inside
 
-![Architecture diagram](./docs/architecture.svg)
+**Goal creation & approval**
+- Thrust area, title, description, and weightage per goal
+- Four units of measure (Numeric, Percentage, Timeline, Zero-based), each with its own scoring formula
+- Weightage validation: total must equal 100%, min 10% per goal, max 8 goals, enforced on the client and again on the server
+- Manager (L1) approval flow: inline edit, return for rework, approve and lock
+- Shared goals: a manager or admin pushes one goal to many reports in a single action; weightage stays adjustable on each recipient
+
+**Tracking & check-ins**
+- Quarterly planned-vs-actual capture, one row per goal per quarter
+- Status per goal: Not Started, On Track, At Risk, Completed
+- Manager check-in comments with a structured log
+- Live weighted sheet score, recomputed on every check-in
+
+**Across the board**
+- Role-based access enforced with Row Level Security at the database layer
+- Immutable audit log: every change after lock recorded with before/after snapshots
+- CSV export for the achievement report and the audit log
+- Microsoft Entra ID SSO (mocked with the same response shape as Graph `/me`)
+- Email + MS Teams + in-app notifications on every lifecycle event
+- Rule-based escalations on stale approvals, swept nightly by a Vercel cron
+- Analytics: quarter-over-quarter trends, distribution by thrust area, department heatmap, manager effectiveness
+
+---
+
+## Stack
 
 | Tier | Tech | Why |
 |------|------|-----|
-| **UI** | Next.js 14 (App Router) + TypeScript + Tailwind + Radix | RSC for fast SSR; type-safe end to end |
-| **Server** | Next.js Server Actions + API Routes | Same project — one deploy, no extra service to host |
-| **DB** | Supabase Postgres + Row Level Security | RLS *is* the authorisation layer — saves a separate auth service |
-| **Identity** | Supabase Auth + mock Entra ID | Real production swaps in MS Graph — same data shape |
-| **Notifications** | Postgres queue table → would route to SendGrid + MS Graph in prod | Channel-agnostic; testable in demo without external accounts |
-| **Cron** | Vercel Cron → `/api/cron/escalations` | Nightly escalation sweep; runs free in Vercel |
-| **Hosting** | Vercel + Supabase, both **free tier** | $0/mo end-to-end on demo volumes |
-
-### Cost optimisation — what this stack saves you
-
-| Decision | Cost saved |
-|---|---|
-| Serverless functions instead of always-on Node server | No idle compute hours |
-| Postgres RLS instead of a separate authZ microservice | Saves an entire service deployment |
-| Single Next.js project for frontend + API + cron | One Vercel project free; no separate backend host |
-| Notifications queued to Postgres, dispatched async | Decouples write path from third-party rate limits |
-| Postgres views (`v_sheet_summary`) instead of materialised aggregates | One read; no caching layer; no Redis |
-
-**On Vercel Hobby + Supabase Free**, this app supports up to ~50,000 monthly active users at $0/mo. Vercel only starts billing past 100GB egress.
+| UI | Next.js (App Router) + TypeScript + Tailwind + Radix | RSC for fast SSR, type-safe end to end |
+| Server | Next.js Server Actions + API routes | One project, one deploy |
+| Database | Supabase Postgres + Row Level Security | RLS *is* the authorisation layer |
+| Identity | Supabase Auth + mock Entra ID | Swaps to real Microsoft Graph with one HTTP call |
+| Notifications | Postgres queue table | Channel-agnostic, testable without external accounts |
+| Cron | Vercel Cron → `/api/cron/escalations` | Nightly escalation sweep |
+| Hosting | Vercel + Supabase, both free tier | $0/month at demo volumes |
 
 ---
 
-## 📁 Project structure
+## Project structure
 
 ```
-atomquest-goals/
-├── app/                          # Next.js App Router routes
-│   ├── (landing) page.tsx        # SSO landing
-│   ├── employee/                 # Employee dashboard + check-ins + inbox
-│   ├── manager/                  # Approvals, shared goals, team check-ins
-│   ├── admin/                    # Analytics, escalations, users, audit, reports
-│   └── api/
-│       ├── reports/              # CSV streaming endpoints
-│       └── cron/escalations/     # Nightly sweep
-├── components/                   # UI primitives + feature components
-│   ├── ui/                       # shadcn-style Button, Card, Input, Pill…
-│   ├── goal-sheet-editor.tsx     # Live weightage tracker + validation
-│   ├── checkin-workspace.tsx     # Quarterly Planned vs Actual capture
-│   └── …
-├── lib/
-│   ├── goals.ts                  # ⭐ Pure business logic — validations + 4 scoring formulas
-│   ├── actions.ts                # Server actions (mutation surface, RLS-aware)
-│   ├── auth.ts                   # Mock Entra ID SSO; swappable for MS Graph
-│   ├── types.ts                  # Domain types mirroring Postgres schema
-│   └── supabase/                 # Server + browser clients
-├── supabase/migrations/
-│   ├── 0001_init.sql             # ⭐ Full schema + RLS policies + triggers
-│   └── 0002_seed_reference.sql   # Thrust areas, active cycle, escalation rules
-├── scripts/seed.ts               # Demo data — sheets in every workflow state
-├── docs/architecture.svg         # System diagram
-└── README.md                     # ← you are here
+app/                      # Next.js App Router routes
+  page.tsx                # landing + SSO sign-in
+  employee/ manager/ admin/   # role dashboards
+  api/reports/            # CSV streaming endpoints
+  api/cron/escalations/   # nightly sweep
+components/               # UI primitives + feature components
+lib/
+  goals.ts                # pure business logic: validation + the 4 scoring formulas
+  actions.ts              # server actions (RLS-aware mutations)
+  auth.ts                 # mock Entra ID SSO, swappable for MS Graph
+supabase/migrations/      # full schema + RLS policies + triggers
+scripts/seed.ts           # demo data in every workflow state
 ```
 
 ---
 
-## 🧪 What to test as a judge
+## Running locally
 
-1. **Sign in as Rohan** (Draft sheet) → see the live weightage tracker. Try submitting — it'll show validation errors because his weightage is 80%, not 100%.
-2. **Sign in as Arjun** (Sales manager) → Approvals page → see Neha's submitted sheet, inline-edit a goal, return with a comment, or approve to lock.
-3. **Sign in as Lakshmi** (Eng manager) → Shared Goals → push one of her goals to multiple reports in a single action.
-4. **Sign in as Kabir** (locked sheet with check-ins) → Check-ins page → see Q1 + Q2 data already captured across all four UoM types.
-5. **Sign in as Priya** (HR admin) →
-   - Analytics → QoQ trends, heatmap, manager effectiveness
-   - Escalations → "Run sweep now" button
-   - Audit log → expand any entry to see before/after diff
-   - Reports → download achievement CSV
+```bash
+npm install
+# add Supabase keys to .env.local (see .env.example)
+npm run dev        # http://localhost:3000
+npm run seed       # populate demo data (needs the service-role key)
+```
 
 ---
 
-## 📜 License
+## License
 
-MIT — built for AtomQuest Hackathon 2026 evaluation.
+MIT.
