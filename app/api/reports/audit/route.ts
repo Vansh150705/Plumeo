@@ -33,7 +33,7 @@ export async function GET() {
     status: 200,
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="atomquest-audit-${new Date().toISOString().slice(0, 10)}.csv"`,
+      'Content-Disposition': `attachment; filename="plumeo-audit-${new Date().toISOString().slice(0, 10)}.csv"`,
       'Cache-Control': 'no-store',
     },
   });

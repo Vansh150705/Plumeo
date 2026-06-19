@@ -63,7 +63,7 @@ export async function GET() {
     }
   }
 
-  const filename = `atomquest-achievement-${cycle!.name.replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.csv`;
+  const filename = `plumeo-achievement-${cycle!.name.replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.csv`;
   return new NextResponse(rows.join('\n'), {
     status: 200,
     headers: {
