@@ -32,13 +32,13 @@ export type EntraClaims = {
 
 /** Mock directory — what Microsoft Graph would return for our demo tenant. */
 const MOCK_DIRECTORY: EntraClaims[] = [
-  { oid: 'aad-9001', upn: 'priya.shah@atomquest.io',     displayName: 'Priya Shah',     department: 'HR',          jobTitle: 'HR Director',         memberOf: ['HR-Admins','All-Employees'],                managerOid: null },
-  { oid: 'aad-9002', upn: 'arjun.mehta@atomquest.io',    displayName: 'Arjun Mehta',    department: 'Sales',       jobTitle: 'Sales Director',      memberOf: ['Managers-L1','Sales','All-Employees'],      managerOid: null },
-  { oid: 'aad-9003', upn: 'lakshmi.r@atomquest.io',      displayName: 'Lakshmi Raman',  department: 'Engineering', jobTitle: 'Engineering Director',memberOf: ['Managers-L1','Engineering','All-Employees'],managerOid: null },
-  { oid: 'aad-9004', upn: 'rohan.k@atomquest.io',        displayName: 'Rohan Kapoor',   department: 'Sales',       jobTitle: 'Account Executive',   memberOf: ['Sales','All-Employees'],                    managerOid: 'aad-9002' },
-  { oid: 'aad-9005', upn: 'neha.iyer@atomquest.io',      displayName: 'Neha Iyer',      department: 'Sales',       jobTitle: 'Account Executive',   memberOf: ['Sales','All-Employees'],                    managerOid: 'aad-9002' },
-  { oid: 'aad-9006', upn: 'kabir.malhotra@atomquest.io', displayName: 'Kabir Malhotra', department: 'Engineering', jobTitle: 'Senior Engineer',     memberOf: ['Engineering','All-Employees'],              managerOid: 'aad-9003' },
-  { oid: 'aad-9007', upn: 'ananya.s@atomquest.io',       displayName: 'Ananya Sharma',  department: 'Engineering', jobTitle: 'Engineer',            memberOf: ['Engineering','All-Employees'],              managerOid: 'aad-9003' },
+  { oid: 'aad-9001', upn: 'priya.shah@plumeo.io',     displayName: 'Priya Shah',     department: 'HR',          jobTitle: 'HR Director',         memberOf: ['HR-Admins','All-Employees'],                managerOid: null },
+  { oid: 'aad-9002', upn: 'arjun.mehta@plumeo.io',    displayName: 'Arjun Mehta',    department: 'Sales',       jobTitle: 'Sales Director',      memberOf: ['Managers-L1','Sales','All-Employees'],      managerOid: null },
+  { oid: 'aad-9003', upn: 'lakshmi.r@plumeo.io',      displayName: 'Lakshmi Raman',  department: 'Engineering', jobTitle: 'Engineering Director',memberOf: ['Managers-L1','Engineering','All-Employees'],managerOid: null },
+  { oid: 'aad-9004', upn: 'rohan.k@plumeo.io',        displayName: 'Rohan Kapoor',   department: 'Sales',       jobTitle: 'Account Executive',   memberOf: ['Sales','All-Employees'],                    managerOid: 'aad-9002' },
+  { oid: 'aad-9005', upn: 'neha.iyer@plumeo.io',      displayName: 'Neha Iyer',      department: 'Sales',       jobTitle: 'Account Executive',   memberOf: ['Sales','All-Employees'],                    managerOid: 'aad-9002' },
+  { oid: 'aad-9006', upn: 'kabir.malhotra@plumeo.io', displayName: 'Kabir Malhotra', department: 'Engineering', jobTitle: 'Senior Engineer',     memberOf: ['Engineering','All-Employees'],              managerOid: 'aad-9003' },
+  { oid: 'aad-9007', upn: 'ananya.s@plumeo.io',       displayName: 'Ananya Sharma',  department: 'Engineering', jobTitle: 'Engineer',            memberOf: ['Engineering','All-Employees'],              managerOid: 'aad-9003' },
 ];
 
 export async function getMockDirectory() {

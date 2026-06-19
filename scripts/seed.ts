@@ -29,13 +29,13 @@ const admin = createClient(url, serviceKey, {
 // Directory — must match lib/auth.ts MOCK_DIRECTORY
 // =============================================================================
 const DIRECTORY = [
-  { oid: 'aad-9001', upn: 'priya.shah@atomquest.io',     name: 'Priya Shah',     dept: 'HR',          role: 'Admin',    groups: ['HR-Admins','All-Employees'], mgr: null },
-  { oid: 'aad-9002', upn: 'arjun.mehta@atomquest.io',    name: 'Arjun Mehta',    dept: 'Sales',       role: 'Manager',  groups: ['Managers-L1','Sales','All-Employees'], mgr: null },
-  { oid: 'aad-9003', upn: 'lakshmi.r@atomquest.io',      name: 'Lakshmi Raman',  dept: 'Engineering', role: 'Manager',  groups: ['Managers-L1','Engineering','All-Employees'], mgr: null },
-  { oid: 'aad-9004', upn: 'rohan.k@atomquest.io',        name: 'Rohan Kapoor',   dept: 'Sales',       role: 'Employee', groups: ['Sales','All-Employees'], mgr: 'aad-9002' },
-  { oid: 'aad-9005', upn: 'neha.iyer@atomquest.io',      name: 'Neha Iyer',      dept: 'Sales',       role: 'Employee', groups: ['Sales','All-Employees'], mgr: 'aad-9002' },
-  { oid: 'aad-9006', upn: 'kabir.malhotra@atomquest.io', name: 'Kabir Malhotra', dept: 'Engineering', role: 'Employee', groups: ['Engineering','All-Employees'], mgr: 'aad-9003' },
-  { oid: 'aad-9007', upn: 'ananya.s@atomquest.io',       name: 'Ananya Sharma',  dept: 'Engineering', role: 'Employee', groups: ['Engineering','All-Employees'], mgr: 'aad-9003' },
+  { oid: 'aad-9001', upn: 'priya.shah@plumeo.io',     name: 'Priya Shah',     dept: 'HR',          role: 'Admin',    groups: ['HR-Admins','All-Employees'], mgr: null },
+  { oid: 'aad-9002', upn: 'arjun.mehta@plumeo.io',    name: 'Arjun Mehta',    dept: 'Sales',       role: 'Manager',  groups: ['Managers-L1','Sales','All-Employees'], mgr: null },
+  { oid: 'aad-9003', upn: 'lakshmi.r@plumeo.io',      name: 'Lakshmi Raman',  dept: 'Engineering', role: 'Manager',  groups: ['Managers-L1','Engineering','All-Employees'], mgr: null },
+  { oid: 'aad-9004', upn: 'rohan.k@plumeo.io',        name: 'Rohan Kapoor',   dept: 'Sales',       role: 'Employee', groups: ['Sales','All-Employees'], mgr: 'aad-9002' },
+  { oid: 'aad-9005', upn: 'neha.iyer@plumeo.io',      name: 'Neha Iyer',      dept: 'Sales',       role: 'Employee', groups: ['Sales','All-Employees'], mgr: 'aad-9002' },
+  { oid: 'aad-9006', upn: 'kabir.malhotra@plumeo.io', name: 'Kabir Malhotra', dept: 'Engineering', role: 'Employee', groups: ['Engineering','All-Employees'], mgr: 'aad-9003' },
+  { oid: 'aad-9007', upn: 'ananya.s@plumeo.io',       name: 'Ananya Sharma',  dept: 'Engineering', role: 'Employee', groups: ['Engineering','All-Employees'], mgr: 'aad-9003' },
 ] as const;
 
 const PWD = (oid: string) => `demo-${oid}`;
@@ -339,9 +339,9 @@ async function main() {
 
   console.log('\n✅ Seed complete!');
   console.log('\n📋 Demo credentials:');
-  console.log('   Admin    →  priya.shah@atomquest.io       (password: demo-aad-9001)');
-  console.log('   Manager  →  arjun.mehta@atomquest.io      (password: demo-aad-9002)');
-  console.log('   Employee →  rohan.k@atomquest.io          (password: demo-aad-9004)');
+  console.log('   Admin    →  priya.shah@plumeo.io       (password: demo-aad-9001)');
+  console.log('   Manager  →  arjun.mehta@plumeo.io      (password: demo-aad-9002)');
+  console.log('   Employee →  rohan.k@plumeo.io          (password: demo-aad-9004)');
   console.log('\nOr just click any tile in the SSO directory on the landing page — no password entry needed.\n');
 }
 
