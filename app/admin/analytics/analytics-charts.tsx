@@ -8,17 +8,19 @@ import {
 } from 'recharts';
 import { cn } from '@/lib/utils';
 
-const COLORS = ['#f0b429', '#c084fc', '#60a5fa', '#4ade80', '#fb923c', '#f87171', '#22d3ee', '#a78bfa'];
+// navy + gold ramp (no bright purple/green — keeps the brand palette)
+const COLORS = ['#B8893A', '#14233D', '#34507C', '#6E83AC', '#C9A45F', '#41608C', '#9AAAC8', '#8A6A2E'];
 
 const tooltipStyle = {
   contentStyle: {
-    background: 'hsl(240 4% 7%)',
-    border: '1px solid hsl(240 4% 16%)',
+    background: '#ffffff',
+    border: '1px solid hsl(218 20% 90%)',
     borderRadius: 8,
     fontSize: 12,
+    boxShadow: '0 10px 30px -16px hsl(218 40% 16% / 0.25)',
   },
-  itemStyle: { color: 'hsl(30 5% 93%)' },
-  labelStyle: { color: 'hsl(30 5% 93%)', fontWeight: 600 },
+  itemStyle: { color: 'hsl(218 54% 14%)' },
+  labelStyle: { color: 'hsl(218 54% 14%)', fontWeight: 600 },
 };
 
 export function AnalyticsCharts({
@@ -54,15 +56,15 @@ export function AnalyticsCharts({
           </div>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={qoqData}>
-              <CartesianGrid stroke="hsl(240 4% 16%)" vertical={false} />
-              <XAxis dataKey="quarter" tick={{ fill: 'hsl(30 3% 65%)', fontSize: 12 }} stroke="hsl(240 4% 16%)" />
-              <YAxis tick={{ fill: 'hsl(30 3% 65%)', fontSize: 12 }} stroke="hsl(240 4% 16%)" domain={[0, 100]} />
+              <CartesianGrid stroke="hsl(218 20% 90%)" vertical={false} />
+              <XAxis dataKey="quarter" tick={{ fill: 'hsl(218 14% 42%)', fontSize: 12 }} stroke="hsl(218 20% 90%)" />
+              <YAxis tick={{ fill: 'hsl(218 14% 42%)', fontSize: 12 }} stroke="hsl(218 20% 90%)" domain={[0, 100]} />
               <Tooltip {...tooltipStyle} />
               <Line
                 type="monotone" dataKey="score"
-                stroke="#f0b429" strokeWidth={2.5}
-                dot={{ fill: '#f0b429', r: 5 }}
-                activeDot={{ r: 7, fill: '#f0b429' }}
+                stroke="#B8893A" strokeWidth={2.5}
+                dot={{ fill: '#B8893A', r: 5 }}
+                activeDot={{ r: 7, fill: '#B8893A' }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -77,11 +79,11 @@ export function AnalyticsCharts({
             <div className="text-xs text-muted-foreground mb-4">Where teams are focusing</div>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={thrustData} layout="vertical">
-                <CartesianGrid stroke="hsl(240 4% 16%)" horizontal={false} />
-                <XAxis type="number" tick={{ fill: 'hsl(30 3% 65%)', fontSize: 11 }} stroke="hsl(240 4% 16%)" />
-                <YAxis type="category" dataKey="name" tick={{ fill: 'hsl(30 3% 65%)', fontSize: 11 }} stroke="hsl(240 4% 16%)" width={120} />
-                <Tooltip {...tooltipStyle} cursor={{ fill: 'hsl(240 4% 12%)' }} />
-                <Bar dataKey="value" fill="#f0b429" radius={[0, 4, 4, 0]} />
+                <CartesianGrid stroke="hsl(218 20% 90%)" horizontal={false} />
+                <XAxis type="number" tick={{ fill: 'hsl(218 14% 42%)', fontSize: 11 }} stroke="hsl(218 20% 90%)" />
+                <YAxis type="category" dataKey="name" tick={{ fill: 'hsl(218 14% 42%)', fontSize: 11 }} stroke="hsl(218 20% 90%)" width={120} />
+                <Tooltip {...tooltipStyle} cursor={{ fill: 'hsl(40 34% 92%)' }} />
+                <Bar dataKey="value" fill="#B8893A" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -105,7 +107,7 @@ export function AnalyticsCharts({
                   {uomData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Tooltip {...tooltipStyle} />
-                <Legend wrapperStyle={{ fontSize: 12, color: 'hsl(30 3% 65%)' }} />
+                <Legend wrapperStyle={{ fontSize: 12, color: 'hsl(218 14% 42%)' }} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -139,12 +141,12 @@ export function AnalyticsCharts({
                           <div
                             className="inline-flex items-center justify-center w-20 h-12 rounded-md font-mono text-sm font-semibold"
                             style={{
-                              backgroundColor: score === 0 ? 'hsl(240 4% 12%)' : `rgba(240, 180, 41, ${0.1 + intensity * 0.5})`,
-                              color: score === 0 ? 'hsl(30 3% 45%)' : score > 75 ? '#f0b429' : 'hsl(30 5% 93%)',
-                              border: `1px solid ${score === 0 ? 'hsl(240 4% 16%)' : `rgba(240, 180, 41, ${0.2 + intensity * 0.4})`}`,
+                              backgroundColor: score === 0 ? 'hsl(40 30% 96%)' : `rgba(184, 137, 58, ${0.12 + intensity * 0.55})`,
+                              color: score === 0 ? 'hsl(218 14% 55%)' : score > 60 ? '#fff' : 'hsl(218 54% 14%)',
+                              border: `1px solid ${score === 0 ? 'hsl(218 20% 90%)' : `rgba(184, 137, 58, ${0.2 + intensity * 0.4})`}`,
                             }}
                           >
-                            {score === 0 ? '—' : score}
+                            {score === 0 ? '·' : score}
                           </div>
                         </td>
                       );
@@ -167,11 +169,11 @@ export function AnalyticsCharts({
           <div className="text-xs text-muted-foreground mb-4">% of expected check-ins captured by each manager&apos;s team</div>
           <ResponsiveContainer width="100%" height={Math.max(200, managerData.length * 50)}>
             <BarChart data={managerData} layout="vertical">
-              <CartesianGrid stroke="hsl(240 4% 16%)" horizontal={false} />
-              <XAxis type="number" domain={[0, 100]} tick={{ fill: 'hsl(30 3% 65%)', fontSize: 11 }} stroke="hsl(240 4% 16%)" />
-              <YAxis type="category" dataKey="name" tick={{ fill: 'hsl(30 3% 65%)', fontSize: 11 }} stroke="hsl(240 4% 16%)" width={100} />
-              <Tooltip {...tooltipStyle} cursor={{ fill: 'hsl(240 4% 12%)' }} formatter={(v: any) => `${v}%`} />
-              <Bar dataKey="completion" fill="#c084fc" radius={[0, 4, 4, 0]} />
+              <CartesianGrid stroke="hsl(218 20% 90%)" horizontal={false} />
+              <XAxis type="number" domain={[0, 100]} tick={{ fill: 'hsl(218 14% 42%)', fontSize: 11 }} stroke="hsl(218 20% 90%)" />
+              <YAxis type="category" dataKey="name" tick={{ fill: 'hsl(218 14% 42%)', fontSize: 11 }} stroke="hsl(218 20% 90%)" width={100} />
+              <Tooltip {...tooltipStyle} cursor={{ fill: 'hsl(40 34% 92%)' }} formatter={(v: any) => `${v}%`} />
+              <Bar dataKey="completion" fill="#14233D" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
