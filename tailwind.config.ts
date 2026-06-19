@@ -12,7 +12,9 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-geist)", "system-ui", "sans-serif"],
-        serif: ["var(--font-instrument)", "serif"],
+        // the app uses a clean sans everywhere; the serif display face is opt-in
+        // on the marketing landing only, via the .font-display class.
+        serif: ["var(--font-geist)", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
       },
       colors: {
