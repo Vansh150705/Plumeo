@@ -8,7 +8,7 @@ import {
 } from 'recharts';
 import { cn } from '@/lib/utils';
 
-// navy + gold ramp (no bright purple/green — keeps the brand palette)
+// navy + gold ramp (no bright purple/green -keeps the brand palette)
 const COLORS = ['#B8893A', '#14233D', '#34507C', '#6E83AC', '#C9A45F', '#41608C', '#9AAAC8', '#8A6A2E'];
 
 const tooltipStyle = {
@@ -44,7 +44,7 @@ export function AnalyticsCharts({
         </p>
       </div>
 
-      {/* Row 1 — QoQ trend (wide) */}
+      {/* Row 1 -QoQ trend (wide) */}
       <Card>
         <CardContent className="p-5">
           <div className="flex items-center justify-between mb-3">
@@ -71,7 +71,7 @@ export function AnalyticsCharts({
         </CardContent>
       </Card>
 
-      {/* Row 2 — Thrust + UoM */}
+      {/* Row 2 -Thrust + UoM */}
       <div className="grid lg:grid-cols-2 gap-4">
         <Card>
           <CardContent className="p-5">
@@ -114,7 +114,7 @@ export function AnalyticsCharts({
         </Card>
       </div>
 
-      {/* Row 3 — Heatmap */}
+      {/* Row 3 -Heatmap */}
       <Card>
         <CardContent className="p-5">
           <div className="text-sm font-semibold mb-1">Department × quarter completion heatmap</div>
@@ -162,7 +162,7 @@ export function AnalyticsCharts({
         </CardContent>
       </Card>
 
-      {/* Row 4 — Manager effectiveness */}
+      {/* Row 4 -Manager effectiveness */}
       <Card>
         <CardContent className="p-5">
           <div className="text-sm font-semibold mb-1">Manager effectiveness</div>
