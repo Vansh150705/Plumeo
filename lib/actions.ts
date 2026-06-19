@@ -5,9 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { validateSheet, computeScore } from '@/lib/goals';
 import type { Goal, GoalSheet, CheckIn, NotifChannel } from '@/lib/types';
 
-// =============================================================================
-// Helper: get the currently authenticated AppUser
-// =============================================================================
+// pull the signed-in AppUser, or send them back to the landing page
 async function requireUser() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -17,9 +15,7 @@ async function requireUser() {
   return { supabase, appUser };
 }
 
-// =============================================================================
-// Audit log helper — called on every lifecycle change
-// =============================================================================
+// writes one audit-log row; we call this on every lifecycle change
 async function audit(
   entity_type: 'goal' | 'check_in' | 'sheet',
   entity_id: string,
@@ -37,9 +33,7 @@ async function audit(
   });
 }
 
-// =============================================================================
-// Notification helper — queues Email + Teams + InApp on a single event
-// =============================================================================
+// fans one event out into Email + Teams + in-app notification rows
 async function notify(args: {
   recipient_id: string;
   subject: string;
@@ -65,9 +59,7 @@ async function notify(args: {
   await supabase.from('notifications').insert(rows);
 }
 
-// =============================================================================
-// SHEET ACTIONS
-// =============================================================================
+// ----- sheet actions -----
 
 /** Get or create the current cycle's goal sheet for the logged-in employee. */
 export async function getOrCreateMySheet() {
@@ -92,7 +84,7 @@ export async function getOrCreateMySheet() {
   return created;
 }
 
-/** Submit a sheet for manager approval — enforces all BRD validations. */
+/** Submit a sheet for approval, after running every validation rule. */
 export async function submitSheet(sheet_id: string) {
   const { supabase, appUser } = await requireUser();
 
@@ -127,7 +119,7 @@ export async function submitSheet(sheet_id: string) {
   return { ok: true };
 }
 
-/** Manager approves a sheet — locks it. */
+/** Manager approves a sheet, which locks it for the rest of the cycle. */
 export async function approveSheet(sheet_id: string) {
   const { supabase, appUser } = await requireUser();
   if (appUser.role !== 'Manager' && appUser.role !== 'Admin') throw new Error('FORBIDDEN');
@@ -193,7 +185,7 @@ export async function returnSheet(sheet_id: string, comment: string) {
   return { ok: true };
 }
 
-/** Admin unlocks an approved sheet — every edit afterwards hits audit_log. */
+/** Admin reopens a locked sheet; from here on every edit is written to the audit log. */
 export async function unlockSheet(sheet_id: string, reason: string) {
   const { supabase, appUser } = await requireUser();
   if (appUser.role !== 'Admin') throw new Error('FORBIDDEN');
@@ -211,9 +203,7 @@ export async function unlockSheet(sheet_id: string, reason: string) {
   return { ok: true };
 }
 
-// =============================================================================
-// GOAL ACTIONS
-// =============================================================================
+// ----- goal actions -----
 export async function upsertGoal(goal: Partial<Goal> & { sheet_id: string }) {
   const { supabase } = await requireUser();
   const isUpdate = !!goal.id;
@@ -245,9 +235,7 @@ export async function deleteGoal(goal_id: string) {
   return { ok: true };
 }
 
-// =============================================================================
-// SHARED GOAL FAN-OUT  (BRD §2.1 — admin/manager push goal to N recipients)
-// =============================================================================
+// ----- shared goals: a manager or admin pushes one goal to many reports -----
 /**
  * Manager/Admin creates a master goal (is_shared_origin = true) on their own
  * sheet, then this function clones it onto each recipient's sheet with
@@ -322,9 +310,7 @@ export async function pushSharedGoal(args: {
   return { ok: true, results };
 }
 
-// =============================================================================
-// CHECK-IN ACTIONS
-// =============================================================================
+// ----- check-in actions -----
 export async function upsertCheckIn(payload: Partial<CheckIn> & { goal_id: string; quarter: CheckIn['quarter'] }) {
   const { supabase } = await requireUser();
 
@@ -355,7 +341,7 @@ export async function upsertCheckIn(payload: Partial<CheckIn> & { goal_id: strin
 
   // If this goal is a shared-origin clone, sync the actual to all linked goals
   if (goal?.shared_origin_id) {
-    // recipient editing — do nothing, recipient's own number is independent
+    // recipient is editing their own copy; leave it, their number is independent
   } else if (goal?.is_shared_origin) {
     // owner updates → propagate actual_numeric / actual_date / zero_achieved
     const { data: clones } = await supabase
@@ -403,9 +389,7 @@ export async function managerCheckIn(check_in_id: string, comment: string) {
   return { ok: true };
 }
 
-// =============================================================================
-// ESCALATION ENGINE — invoked by /api/cron/escalations (or manually from admin)
-// =============================================================================
+// ----- escalation engine: run by the nightly cron, or on demand from the admin UI -----
 export async function runEscalationSweep() {
   const { supabase, appUser } = await requireUser();
   if (appUser.role !== 'Admin') throw new Error('FORBIDDEN');
@@ -448,11 +432,11 @@ export async function runEscalationSweep() {
         }
       } else if (rule.trigger_type === 'checkin_overdue') {
         // Check active quarter window
-        // (Simplified for demo — a real impl reads per-quarter close dates)
+        // (kept simple for the demo; a real version would read per-quarter close dates)
       }
 
       if (shouldTrigger) {
-        // Dedupe — don't trigger same rule on same subject twice within 24h
+        // de-dupe: don't fire the same rule on the same person twice within 24h
         const { data: dup } = await supabase
           .from('escalation_events')
           .select('id')
@@ -487,7 +471,7 @@ export async function runEscalationSweep() {
           await notify({
             recipient_id,
             subject: `Escalation: ${rule.name}`,
-            body: `${employee.full_name} — ${reason}`,
+            body: `${employee.full_name}: ${reason}`,
             deep_link: `/admin/escalations`,
             payload: { event: 'escalation', rule_id: rule.id, subject_id: employee.id },
           });
