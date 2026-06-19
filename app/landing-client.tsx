@@ -866,7 +866,7 @@ function Footer() {
             </p>
           </div>
           <FooterCol title="Product" links={[['Features', '#features'], ['How it works', '#how'], ['For teams', '#teams']]} />
-          <FooterCol title="Build" links={[['GitHub', GH], ['Architecture', '/docs/architecture.svg']]} />
+          <FooterCol title="Build" links={[['GitHub', GH], ['Sign in', '#top']]} />
         </div>
         <div className="mt-12 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-t border-border pt-6 text-[12px] text-muted-foreground">
           <span>© {new Date().getFullYear()} Plumeo</span>
