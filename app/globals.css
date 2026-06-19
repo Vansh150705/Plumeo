@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,400..600&family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,400..600&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -31,7 +31,6 @@
 
     --font-geist: 'Geist', system-ui, sans-serif;
     --font-geist-mono: 'Geist Mono', ui-monospace, monospace;
-    --font-instrument: 'Fraunces', Georgia, serif;
   }
 
   .dark {
@@ -81,21 +80,7 @@
 }
 
 @layer components {
-  /* Grain overlay */
-  .grain::before {
-    content: ''; position: fixed; inset: 0; pointer-events: none; opacity: 0.025; z-index: 1;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' /%3E%3C/svg%3E");
-  }
-
-  /* Subtle gradient mesh for hero areas */
-  .mesh-bg {
-    background:
-      radial-gradient(at 20% 20%, hsl(39 88% 55% / 0.07) 0px, transparent 50%),
-      radial-gradient(at 80% 30%, hsl(280 70% 60% / 0.04) 0px, transparent 50%),
-      radial-gradient(at 40% 80%, hsl(210 80% 60% / 0.03) 0px, transparent 50%);
-  }
-
-  /* Pills */
+  /* status pills */
   .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px;
     font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
 
