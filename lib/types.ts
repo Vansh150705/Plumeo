@@ -1,4 +1,4 @@
-/** Domain types — mirror Postgres schema. Single source of truth. */
+/** Domain types that mirror the Postgres schema. */
 
 export type UserRole = 'Employee' | 'Manager' | 'Admin';
 export type UomType = 'Numeric' | 'Percentage' | 'Timeline' | 'Zero';

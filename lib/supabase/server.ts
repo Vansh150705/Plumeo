@@ -15,14 +15,14 @@ export function createClient() {
           try {
             cookieStore.set({ name, value, ...options });
           } catch {
-            /* called from a Server Component — handled by middleware */
+            /* happens when called from a Server Component; middleware handles it */
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value: '', ...options });
           } catch {
-            /* called from a Server Component — handled by middleware */
+            /* happens when called from a Server Component; middleware handles it */
           }
         },
       },
@@ -30,7 +30,7 @@ export function createClient() {
   );
 }
 
-/** Admin client — service-role key. Use ONLY in server-side scripts / API routes. */
+/** Service-role client. Server-side scripts and API routes only, never the browser. */
 export function createAdminClient() {
   const { createClient } = require('@supabase/supabase-js');
   return createClient(

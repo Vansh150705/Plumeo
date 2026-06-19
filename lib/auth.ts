@@ -4,20 +4,18 @@ import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-/**
- * MOCK MICROSOFT ENTRA ID (AZURE AD) SSO
- * ---------------------------------------------------------------------------
- * BRD §5.1 bonus. In a real deployment this entire file is replaced by a
- * call to Microsoft Graph's /me endpoint after an OAuth code exchange:
+/*
+ * Stand-in for Microsoft Entra ID (Azure AD) single sign-on.
+ * In a real deployment this whole file becomes one call to Microsoft Graph's
+ * /me endpoint after the OAuth code exchange:
  *
  *   GET https://graph.microsoft.com/v1.0/me
  *   -> { id, userPrincipalName, displayName, jobTitle, department,
  *        memberOf: [{ displayName: 'Managers-L1' }, ...] }
  *
- * The contract here mirrors that response shape, so swapping mock → real is
- * one HTTP call away. Role mapping below is identical to what a real
- * production Entra integration would do.
- * ---------------------------------------------------------------------------
+ * We deliberately match that response shape, so going from mock to real is
+ * basically swapping in that one request. The role mapping below is exactly
+ * what a production Entra integration would do.
  */
 
 export type EntraClaims = {
@@ -30,7 +28,7 @@ export type EntraClaims = {
   managerOid: string | null;
 };
 
-/** Mock directory — what Microsoft Graph would return for our demo tenant. */
+/** The fake tenant directory, shaped like what Microsoft Graph would hand back. */
 const MOCK_DIRECTORY: EntraClaims[] = [
   { oid: 'aad-9001', upn: 'priya.shah@plumeo.io',     displayName: 'Priya Shah',     department: 'HR',          jobTitle: 'HR Director',         memberOf: ['HR-Admins','All-Employees'],                managerOid: null },
   { oid: 'aad-9002', upn: 'arjun.mehta@plumeo.io',    displayName: 'Arjun Mehta',    department: 'Sales',       jobTitle: 'Sales Director',      memberOf: ['Managers-L1','Sales','All-Employees'],      managerOid: null },
@@ -93,7 +91,7 @@ export async function ssoSignIn(oid: string) {
     entra_groups: claims.memberOf,
   });
 
-  // 3. Sync org hierarchy — resolve manager via Entra managerOid
+  // 3. wire up the org chart: look up this person's manager by their Entra oid
   if (claims.managerOid) {
     const mgrClaims = MOCK_DIRECTORY.find(u => u.oid === claims.managerOid);
     if (mgrClaims) {
