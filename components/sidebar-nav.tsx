@@ -52,7 +52,7 @@ function NavBody({ user, onNavigate }: { user: AppUser; onNavigate?: () => void 
           <Feather className="size-[18px]" style={{ color: 'hsl(var(--gold))' }} />
         </div>
         <div>
-          <div className="font-display text-[15px] font-medium tracking-tight">Plumeo</div>
+          <div className="text-[15px] font-semibold tracking-tight">Plumeo</div>
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{user.role}</div>
         </div>
       </div>

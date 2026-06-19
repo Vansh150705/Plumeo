@@ -67,7 +67,10 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  .font-serif { font-family: var(--font-instrument); letter-spacing: -0.02em; font-weight: 400; }
+  /* the app/dashboards use a clean sans for headings and big figures so they
+     read like a professional tool. the marketing landing opts into the serif
+     display face via .font-display instead. */
+  .font-serif { font-family: var(--font-geist); letter-spacing: -0.015em; font-weight: 600; }
   .font-mono { font-family: var(--font-geist-mono); }
 
   /* Scrollbar */
