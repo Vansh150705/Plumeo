@@ -235,7 +235,7 @@ export function GoalSheetEditor({
 }
 
 // =============================================================================
-// Weightage dial — animated SVG donut
+// the weightage dial: an animated SVG donut
 // =============================================================================
 function WeightageDial({ total }: { total: number }) {
   const pct = Math.min(total, 100);
@@ -266,7 +266,7 @@ function WeightageDial({ total }: { total: number }) {
 }
 
 // =============================================================================
-// Single goal row — collapsed (view) and expanded (edit) states
+// one goal row, with a collapsed view state and an expanded edit state
 // =============================================================================
 function GoalRow({
   goal, editing, locked, thrustAreas, otherWeightage,
@@ -408,11 +408,11 @@ function GoalRow({
               disabled={cantEditCore}
               className="flex h-9 w-full rounded-lg border border-input bg-background px-3 text-sm disabled:opacity-50"
             >
-              <option value="Numeric|min">Numeric — Higher better</option>
-              <option value="Numeric|max">Numeric — Lower better</option>
-              <option value="Percentage|min">Percentage — Higher better</option>
-              <option value="Percentage|max">Percentage — Lower better</option>
-              <option value="Timeline|timeline">Timeline — Date based</option>
+              <option value="Numeric|min">Numeric (higher is better)</option>
+              <option value="Numeric|max">Numeric (lower is better)</option>
+              <option value="Percentage|min">Percentage (higher is better)</option>
+              <option value="Percentage|max">Percentage (lower is better)</option>
+              <option value="Timeline|timeline">Timeline (date based)</option>
               <option value="Zero|zero">Zero-based (0 = success)</option>
             </select>
           </div>

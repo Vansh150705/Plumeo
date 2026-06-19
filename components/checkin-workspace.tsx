@@ -144,7 +144,7 @@ export function CheckInWorkspace({
         />
         <SummaryCard
           label={`${quarter} weighted score`}
-          value={sheetScore.score == null ? '—' : `${Math.round(sheetScore.score)}`}
+          value={sheetScore.score == null ? '·' : `${Math.round(sheetScore.score)}`}
           hint="Across scored goals"
           highlight={sheetScore.score != null && sheetScore.score >= 90}
         />
@@ -182,7 +182,7 @@ function SummaryCard({
 }
 
 // =============================================================================
-// Single goal check-in row — handles all 4 UoM types
+// one row per goal; copes with all four unit-of-measure types
 // =============================================================================
 function CheckInRow({
   goal, checkIn, quarter, viewerRole, onSaved,
@@ -269,7 +269,7 @@ function CheckInRow({
               'font-serif text-3xl tabular-nums',
               previewScore == null ? 'text-muted-foreground' : previewScore >= 80 ? 'text-emerald-400' : previewScore >= 50 ? 'text-primary' : 'text-orange-400',
             )}>
-              {previewScore == null ? '—' : Math.round(previewScore)}
+              {previewScore == null ? '·' : Math.round(previewScore)}
             </div>
           </div>
         </div>
@@ -291,7 +291,7 @@ function CheckInRow({
                       : 'border-border bg-background hover:bg-accent',
                   )}
                 >
-                  Yes — 0 incidents
+                  Yes, 0 incidents
                 </button>
                 <button
                   onClick={() => setZeroAchieved(false)}
@@ -372,7 +372,7 @@ function CheckInRow({
           />
         </div>
 
-        {/* Manager comment — visible to all, editable by managers/admins */}
+        {/* manager comment: everyone can see it, only managers and admins can edit */}
         <div className="rounded-lg border border-border bg-background/50 p-3">
           <div className="flex items-center gap-2 mb-2">
             <MessageSquare className="size-3.5 text-primary" />
