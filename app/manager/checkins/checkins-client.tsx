@@ -45,7 +45,7 @@ export function ManagerCheckinsClient({
                   <div className="text-sm font-medium truncate">{r.full_name}</div>
                   <div className="text-[11px] text-muted-foreground">{r.department}</div>
                 </div>
-                {s ? <StatusPill status={s.status} /> : <Pill variant="gray">—</Pill>}
+                {s ? <StatusPill status={s.status} /> : <Pill variant="gray">·</Pill>}
               </button>
             );
           })}

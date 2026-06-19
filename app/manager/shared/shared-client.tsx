@@ -76,7 +76,7 @@ export function SharedGoalsClient({ myGoals, reports }: { myGoals: Goal[]; repor
       )}
 
       <div className="grid lg:grid-cols-[1.2fr_1fr] gap-5">
-        {/* Step 1 — pick a goal */}
+        {/* step 1: pick a goal */}
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center gap-2 mb-4">
@@ -115,7 +115,7 @@ export function SharedGoalsClient({ myGoals, reports }: { myGoals: Goal[]; repor
           </CardContent>
         </Card>
 
-        {/* Step 2 — recipients */}
+        {/* step 2: choose recipients */}
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-4">
@@ -158,7 +158,7 @@ export function SharedGoalsClient({ myGoals, reports }: { myGoals: Goal[]; repor
               )}
             </div>
 
-            {/* Step 3 — weightage */}
+            {/* step 3: set each recipient's weightage */}
             <div className="mt-4 pt-4 border-t border-border">
               <div className="flex items-center gap-2 mb-2">
                 <div className="size-6 rounded-full bg-primary/15 text-primary grid place-items-center text-[11px] font-semibold">3</div>

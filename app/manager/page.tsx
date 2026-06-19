@@ -108,7 +108,7 @@ export default async function ManagerHome() {
                         <div className="text-muted-foreground text-[10px]">defined</div>
                       </div>
                       <div className="text-right">
-                        <div className="font-mono tabular-nums">{score ?? '—'}</div>
+                        <div className="font-mono tabular-nums">{score ?? '·'}</div>
                         <div className="text-muted-foreground text-[10px]">score</div>
                       </div>
                     </div>

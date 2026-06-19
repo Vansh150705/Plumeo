@@ -2,7 +2,7 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 /**
- * Vercel cron — runs nightly to detect lapses and trigger escalations.
+ * Vercel cron: runs nightly to catch lapses and fire off escalations.
  * Add to vercel.json: { "crons": [{ "path": "/api/cron/escalations", "schedule": "0 2 * * *" }] }
  *
  * Uses the admin client so it runs without an authenticated user. A real prod
