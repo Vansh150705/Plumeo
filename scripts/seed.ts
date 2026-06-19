@@ -1,14 +1,8 @@
-/**
- * Seed script — creates demo data so judges land on a fully populated app.
- *
- * Run after applying migrations:
- *   npm run seed
- *
- * Requires:
- *   NEXT_PUBLIC_SUPABASE_URL
- *   SUPABASE_SERVICE_ROLE_KEY
- *
- * Idempotent — safe to run multiple times.
+/*
+ * Fills a fresh database with demo data so the app looks alive on first open.
+ * Run it after the migrations:  npm run seed
+ * Needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in the env.
+ * Safe to run more than once - it wipes its own demo sheets before re-creating them.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -25,9 +19,7 @@ const admin = createClient(url, serviceKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
-// =============================================================================
-// Directory — must match lib/auth.ts MOCK_DIRECTORY
-// =============================================================================
+// the same seven people as lib/auth.ts MOCK_DIRECTORY - keep the two in sync
 const DIRECTORY = [
   { oid: 'aad-9001', upn: 'priya.shah@plumeo.io',     name: 'Priya Shah',     dept: 'HR',          role: 'Admin',    groups: ['HR-Admins','All-Employees'], mgr: null },
   { oid: 'aad-9002', upn: 'arjun.mehta@plumeo.io',    name: 'Arjun Mehta',    dept: 'Sales',       role: 'Manager',  groups: ['Managers-L1','Sales','All-Employees'], mgr: null },
@@ -40,13 +32,10 @@ const DIRECTORY = [
 
 const PWD = (oid: string) => `demo-${oid}`;
 
-// =============================================================================
 async function main() {
-  console.log('🌱 Seeding AtomQuest demo data...\n');
+  console.log('🌱 Seeding Plumeo demo data...\n');
 
-  // -----------------------------------------------------------------------
-  // 1. Create / find auth users + upsert public.users
-  // -----------------------------------------------------------------------
+  // 1. create or find the auth users, then mirror them into public.users
   console.log('1/5 Provisioning users...');
   const oidToUserId: Record<string, string> = {};
 
@@ -89,20 +78,16 @@ async function main() {
     await admin.from('users').update({ manager_id: oidToUserId[d.mgr] }).eq('id', oidToUserId[d.oid]);
   }
 
-  // -----------------------------------------------------------------------
-  // 2. Active cycle (from seed SQL — fetch it)
-  // -----------------------------------------------------------------------
+  // 2. grab the active cycle the migration created
   console.log('\n2/5 Loading active cycle...');
   const { data: cycle } = await admin.from('cycles').select('*').eq('is_active', true).single();
   if (!cycle) { console.error('No active cycle. Run 0002 migration first.'); process.exit(1); }
   console.log(`  ✓ ${cycle.name}`);
 
-  // -----------------------------------------------------------------------
-  // 3. Goal sheets in every workflow state
-  // -----------------------------------------------------------------------
+  // 3. one goal sheet per person, each parked in a different workflow state
   console.log('\n3/5 Creating goal sheets in various states...');
 
-  // Wipe prior demo sheets first (idempotent — keeps re-runs predictable)
+  // clear out sheets from a previous run so re-seeding stays predictable
   for (const d of DIRECTORY) {
     if (d.role === 'Admin') continue;
     await admin.from('goal_sheets').delete().eq('employee_id', oidToUserId[d.oid]).eq('cycle_id', cycle.id);
@@ -116,7 +101,7 @@ async function main() {
     if (status === 'Returned') {
       payload.submitted_at = new Date(now.getTime() - 9 * 86400000).toISOString();
       payload.returned_at  = new Date(now.getTime() - 6 * 86400000).toISOString();
-      payload.return_comment = 'Targets look optimistic — split the ARR goal into two more measurable sub-goals.';
+      payload.return_comment = 'Targets look optimistic; split the ARR goal into two more measurable sub-goals.';
     }
     if (status === 'Approved') {
       payload.submitted_at = new Date(now.getTime() - 30 * 86400000).toISOString();
@@ -128,19 +113,17 @@ async function main() {
     return data;
   };
 
-  // Manager sheets — Approved
+  // both managers get an approved sheet
   const arjunSheet = await upsertSheet('aad-9002', 'Approved');
   const lakshmiSheet = await upsertSheet('aad-9003', 'Approved');
 
-  // Employees — varied states
+  // employees land in a mix of states so every screen has something to show
   const rohanSheet = await upsertSheet('aad-9004', 'Draft');         // Incomplete (80% weight, 4 goals)
   const nehaSheet = await upsertSheet('aad-9005', 'Submitted');      // Awaiting approval
   const kabirSheet = await upsertSheet('aad-9006', 'Approved');      // Locked + has check-ins
   const ananyaSheet = await upsertSheet('aad-9007', 'Returned');     // Returned with comment
 
-  // -----------------------------------------------------------------------
-  // 4. Goals + Check-ins
-  // -----------------------------------------------------------------------
+  // 4. the goals themselves, plus a couple of quarters of check-ins for Kabir
   console.log('\n4/5 Creating goals + check-ins...');
 
   type GoalSpec = {
@@ -189,7 +172,7 @@ async function main() {
   // Mark Lakshmi's "Ship 4 features" as a shared origin we can cascade later
   await admin.from('goals').update({ is_shared_origin: true }).eq('id', lakshmiGoalIds[0]);
 
-  // Rohan — Draft, only 4 goals, weightage = 80 (incomplete on purpose for demo)
+  // Rohan: Draft, only 4 goals, weightage = 80 (left incomplete on purpose)
   await addGoals(rohanSheet.id, [
     { thrust_area: 'Revenue Growth', title: 'Close ₹3.5 Cr new ARR', uom: 'Numeric', direction: 'min', target_numeric: 3_50_00_000, weightage: 35 },
     { thrust_area: 'Customer Experience', title: 'Personal NPS ≥ 60', uom: 'Numeric', direction: 'min', target_numeric: 60, weightage: 20 },
@@ -197,7 +180,7 @@ async function main() {
     { thrust_area: 'Innovation & Technology', title: 'Author 6 case studies', uom: 'Numeric', direction: 'min', target_numeric: 6, weightage: 10 },
   ]);
 
-  // Neha — Submitted, 5 goals
+  // Neha: Submitted, 5 goals
   const nehaGoalIds = await addGoals(nehaSheet.id, [
     { thrust_area: 'Revenue Growth', title: 'Close ₹4.2 Cr new ARR', uom: 'Numeric', direction: 'min', target_numeric: 4_20_00_000, weightage: 35 },
     { thrust_area: 'Customer Experience', title: 'Personal NPS ≥ 65', uom: 'Numeric', direction: 'min', target_numeric: 65, weightage: 20 },
@@ -206,7 +189,7 @@ async function main() {
     { thrust_area: 'People & Culture', title: 'Mentor 2 SDRs to BDR promotion', uom: 'Numeric', direction: 'min', target_numeric: 2, weightage: 10 },
   ]);
 
-  // Kabir — Approved/Locked, 6 goals + Q1 + Q2 check-ins
+  // Kabir: Approved and locked, 6 goals plus Q1 and Q2 check-ins
   const kabirGoalIds = await addGoals(kabirSheet.id, [
     { thrust_area: 'Innovation & Technology', title: 'Ship payments redesign by Q3', uom: 'Timeline', direction: 'timeline', target_date: '2027-01-31', weightage: 25 },
     { thrust_area: 'Safety & Quality', title: 'Zero P0 incidents owned', uom: 'Zero', direction: 'zero', weightage: 20 },
@@ -247,16 +230,14 @@ async function main() {
     { goal_id: kabirGoalIds[5], quarter: 'Q2', actual_numeric: 2, progress_status: 'Completed', computed_score: 100 },
   ]);
 
-  // Ananya — Returned with comment, only 3 goals
+  // Ananya: Returned with a comment, only 3 goals
   await addGoals(ananyaSheet.id, [
     { thrust_area: 'Innovation & Technology', title: 'Ship checkout v2', uom: 'Timeline', direction: 'timeline', target_date: '2027-02-28', weightage: 50 },
     { thrust_area: 'Operational Excellence', title: 'Reduce build time 40%', uom: 'Percentage', direction: 'min', target_numeric: 40, weightage: 30 },
     { thrust_area: 'People & Culture', title: 'Pair 4h/week', uom: 'Numeric', direction: 'min', target_numeric: 4, weightage: 20 },
   ]);
 
-  // -----------------------------------------------------------------------
-  // 5. Notifications + Escalation events for the demo
-  // -----------------------------------------------------------------------
+  // 5. a few notifications and escalation events so the inboxes feel real
   console.log('\n5/5 Seeding notifications + escalations...');
   const now = new Date();
 
@@ -301,14 +282,14 @@ async function main() {
     {
       recipient_id: oidToUserId['aad-9001'], channel: 'InApp',
       subject: 'Escalation: Approval pending',
-      body: 'Neha Iyer — Submitted 5 days ago, still awaiting approval.',
+      body: 'Neha Iyer: submitted 5 days ago, still awaiting approval.',
       deep_link: '/admin/escalations',
       sent_at: null,
     },
     {
       recipient_id: oidToUserId['aad-9001'], channel: 'InApp',
       subject: 'Escalation: Goal sheet not submitted',
-      body: 'Rohan Kapoor — Still in Draft 12 days after cycle opened.',
+      body: 'Rohan Kapoor: still in Draft 12 days after the cycle opened.',
       deep_link: '/admin/escalations',
       sent_at: null,
     },
@@ -342,7 +323,7 @@ async function main() {
   console.log('   Admin    →  priya.shah@plumeo.io       (password: demo-aad-9001)');
   console.log('   Manager  →  arjun.mehta@plumeo.io      (password: demo-aad-9002)');
   console.log('   Employee →  rohan.k@plumeo.io          (password: demo-aad-9004)');
-  console.log('\nOr just click any tile in the SSO directory on the landing page — no password entry needed.\n');
+  console.log('\nOr just click any tile in the SSO directory on the landing page, no password entry needed.\n');
 }
 
 main().catch(e => { console.error(e); process.exit(1); });
