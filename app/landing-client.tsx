@@ -344,8 +344,8 @@ function HeroScene() {
         </div>
       </motion.div>
 
-      {/* teammates (mid depth) — the top-left one is hidden on phones so it
-          doesn't clip the card header */}
+      {/* teammates (mid depth). the top-left one is hidden on phones so it
+          doesn't clip the card header. */}
       <FloatAvatar variant="employee" className="-left-5 -top-6 hidden size-[72px] sm:block" mx={mx} my={my} depth={26} delay={0.5} />
       <FloatAvatar variant="manager" className="-right-4 top-16 size-[56px] sm:-right-6 sm:size-[60px]" mx={mx} my={my} depth={34} delay={0.65} />
       <FloatAvatar variant="admin" className="-bottom-5 left-16 size-[54px] sm:left-20 sm:size-[58px]" mx={mx} my={my} depth={30} delay={0.8} />
