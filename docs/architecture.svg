@@ -37,7 +37,7 @@
   <text x="60" y="130" fill="#9b9ba0" font-size="14">Free-tier hosted · zero idle cost · Postgres RLS as the authorisation primitive</text>
 
   <!-- ============================================================== -->
-  <!-- TIER 1 — Clients                                                  -->
+  <!-- TIER 1 - Clients                                                  -->
   <!-- ============================================================== -->
   <g transform="translate(60,180)">
     <text x="0" y="0" fill="#6b6b73" font-size="10" font-weight="600" letter-spacing="2">CLIENTS</text>
@@ -46,7 +46,7 @@
       <rect width="220" height="86" rx="12" fill="#16161a" stroke="#26262b" stroke-width="1"/>
       <text x="20" y="30" fill="#fafafa" font-size="14" font-weight="600">Web browser</text>
       <text x="20" y="50" fill="#9b9ba0" font-size="11">Employees · Managers · Admin</text>
-      <text x="20" y="68" fill="#6b6b73" font-size="10">Desktop · mobile · tablet — single responsive app</text>
+      <text x="20" y="68" fill="#6b6b73" font-size="10">Desktop · mobile · tablet - single responsive app</text>
     </g>
 
     <g transform="translate(240,15)">
@@ -58,7 +58,7 @@
   </g>
 
   <!-- ============================================================== -->
-  <!-- TIER 2 — Application                                              -->
+  <!-- TIER 2 - Application                                              -->
   <!-- ============================================================== -->
   <g transform="translate(60,330)">
     <text x="0" y="0" fill="#6b6b73" font-size="10" font-weight="600" letter-spacing="2">APPLICATION TIER · VERCEL EDGE NETWORK</text>
@@ -90,18 +90,18 @@
     <!-- Business logic -->
     <g transform="translate(20,118)">
       <rect width="500" height="50" rx="10" fill="#1f1c12" stroke="#3a3220"/>
-      <text x="16" y="22" fill="#f0b429" font-size="12" font-weight="600">lib/goals.ts — pure business logic</text>
+      <text x="16" y="22" fill="#f0b429" font-size="12" font-weight="600">lib/goals.ts - pure business logic</text>
       <text x="16" y="38" fill="#a89572" font-size="10">Validation · 4 scoring formulas · quarter windows · shared on client + server</text>
     </g>
     <g transform="translate(540,118)">
       <rect width="520" height="50" rx="10" fill="#1f1c12" stroke="#3a3220"/>
-      <text x="16" y="22" fill="#f0b429" font-size="12" font-weight="600">lib/actions.ts — mutation layer</text>
+      <text x="16" y="22" fill="#f0b429" font-size="12" font-weight="600">lib/actions.ts - mutation layer</text>
       <text x="16" y="38" fill="#a89572" font-size="10">RLS-enforced writes · audit log on every change · notification fan-out</text>
     </g>
   </g>
 
   <!-- ============================================================== -->
-  <!-- TIER 3 — Data + Identity                                          -->
+  <!-- TIER 3 - Data + Identity                                          -->
   <!-- ============================================================== -->
   <g transform="translate(60,555)">
     <text x="0" y="0" fill="#6b6b73" font-size="10" font-weight="600" letter-spacing="2">DATA &amp; IDENTITY · SUPABASE</text>
