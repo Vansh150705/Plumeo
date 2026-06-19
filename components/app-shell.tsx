@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { SidebarNav } from '@/components/sidebar-nav';
-import { TopBar } from '@/components/top-bar';
+import { DashboardChrome } from '@/components/dashboard-chrome';
 import type { UserRole } from '@/lib/types';
 
 export async function AppShell({
@@ -33,12 +32,8 @@ export async function AppShell({
     .limit(20);
 
   return (
-    <div className="flex min-h-screen">
-      <SidebarNav user={appUser} />
-      <div className="flex-1 flex flex-col min-w-0">
-        <TopBar user={appUser} notifications={notifications ?? []} />
-        <main className="flex-1 overflow-y-auto">{children}</main>
-      </div>
-    </div>
+    <DashboardChrome user={appUser} notifications={notifications ?? []}>
+      {children}
+    </DashboardChrome>
   );
 }

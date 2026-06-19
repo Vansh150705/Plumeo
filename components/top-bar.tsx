@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, Menu } from 'lucide-react';
 import { Pill } from '@/components/ui/pill';
 import { fmtRelative } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import type { AppUser, Notification } from '@/lib/types';
 
-export function TopBar({ user, notifications: initialNotifications }: { user: AppUser; notifications: Notification[] }) {
+export function TopBar({ user, notifications: initialNotifications, onMenu }: { user: AppUser; notifications: Notification[]; onMenu?: () => void }) {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState(initialNotifications);
   const router = useRouter();
@@ -35,6 +35,9 @@ export function TopBar({ user, notifications: initialNotifications }: { user: Ap
   return (
     <header className="h-14 px-6 border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-30 flex items-center justify-between">
       <div className="flex items-center gap-3">
+        <button onClick={onMenu} className="-ml-2 rounded-md p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground md:hidden" aria-label="Open menu">
+          <Menu className="size-4" />
+        </button>
         <div className="text-xs uppercase tracking-widest text-muted-foreground">FY 2026-27</div>
         <Pill variant="green">Active cycle</Pill>
       </div>

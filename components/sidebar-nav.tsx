@@ -11,15 +11,44 @@ import {
 import type { AppUser } from '@/lib/types';
 import { signOut } from '@/lib/auth';
 
-export function SidebarNav({ user }: { user: AppUser }) {
-  const pathname = usePathname();
+export function SidebarNav({ user, mobileOpen = false, onClose }: {
+  user: AppUser;
+  mobileOpen?: boolean;
+  onClose?: () => void;
+}) {
+  return (
+    <>
+      {/* desktop: a fixed rail */}
+      <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-card/50 backdrop-blur-sm md:flex">
+        <NavBody user={user} />
+      </aside>
 
+      {/* mobile: a slide-in drawer over a dimmed backdrop */}
+      <div className={cn('fixed inset-0 z-50 md:hidden', mobileOpen ? '' : 'pointer-events-none')}>
+        <div
+          className={cn('absolute inset-0 bg-foreground/30 backdrop-blur-sm transition-opacity', mobileOpen ? 'opacity-100' : 'opacity-0')}
+          onClick={onClose}
+        />
+        <aside className={cn(
+          'absolute left-0 top-0 flex h-full w-64 flex-col border-r border-border bg-card shadow-2xl transition-transform duration-300',
+          mobileOpen ? 'translate-x-0' : '-translate-x-full',
+        )}>
+          <NavBody user={user} onNavigate={onClose} />
+        </aside>
+      </div>
+    </>
+  );
+}
+
+// the actual contents, shared between the desktop rail and the mobile drawer.
+function NavBody({ user, onNavigate }: { user: AppUser; onNavigate?: () => void }) {
+  const pathname = usePathname();
   const links = navFor(user.role);
 
   return (
-    <aside className="w-60 shrink-0 border-r border-border bg-card/50 backdrop-blur-sm flex flex-col">
-      <div className="px-5 py-5 flex items-center gap-2.5">
-        <div className="size-8 rounded-lg bg-primary grid place-items-center">
+    <>
+      <div className="flex items-center gap-2.5 px-5 py-5">
+        <div className="grid size-8 place-items-center rounded-lg bg-primary">
           <Feather className="size-[18px]" style={{ color: 'hsl(var(--gold))' }} />
         </div>
         <div>
@@ -28,13 +57,13 @@ export function SidebarNav({ user }: { user: AppUser }) {
         </div>
       </div>
 
-      <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2">
         {links.map(group => (
           <div key={group.label} className="mb-4">
             <div className="px-3 pb-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">{group.label}</div>
             {group.items.map(item => {
-              // Root dashboard hrefs (e.g. /manager, /admin, /employee) should
-              // only match exactly — otherwise they light up on every sub-route.
+              // root hrefs like /manager or /admin should only highlight on an exact
+              // match, otherwise they'd light up on every sub-page underneath them.
               const isRoot = item.href.split('/').filter(Boolean).length === 1;
               const active = isRoot
                 ? pathname === item.href
@@ -43,11 +72,12 @@ export function SidebarNav({ user }: { user: AppUser }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={onNavigate}
                   className={cn(
-                    'flex items-center gap-2.5 px-3 py-1.5 rounded-md text-sm transition-colors',
+                    'flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors',
                     active
-                      ? 'bg-accent text-foreground border border-border'
-                      : 'text-muted-foreground hover:bg-accent hover:text-foreground border border-transparent',
+                      ? 'border border-border bg-accent text-foreground'
+                      : 'border border-transparent text-muted-foreground hover:bg-accent hover:text-foreground',
                   )}
                 >
                   <item.icon className={cn('size-4', active && 'text-primary')} />
@@ -59,21 +89,21 @@ export function SidebarNav({ user }: { user: AppUser }) {
         ))}
       </nav>
 
-      <div className="px-3 py-3 border-t border-border">
+      <div className="border-t border-border px-3 py-3">
         <div className="flex items-center gap-2.5 px-2 py-1.5">
           <Avatar name={user.full_name} id={user.id} size={32} />
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-medium truncate">{user.full_name}</div>
-            <div className="text-[10px] text-muted-foreground truncate">{user.upn}</div>
+            <div className="truncate text-xs font-medium">{user.full_name}</div>
+            <div className="truncate text-[10px] text-muted-foreground">{user.upn}</div>
           </div>
           <form action={signOut}>
-            <button type="submit" className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition" title="Sign out">
+            <button type="submit" className="rounded p-1.5 text-muted-foreground transition hover:bg-accent hover:text-foreground" title="Sign out">
               <LogOut className="size-3.5" />
             </button>
           </form>
         </div>
       </div>
-    </aside>
+    </>
   );
 }
 
