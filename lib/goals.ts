@@ -26,7 +26,7 @@ export type ValidationIssue = {
   goalId?: string;
 };
 
-/** Validate the entire sheet against every BRD rule. */
+/** Check a whole sheet against every rule; returns a list of problems (empty = good to submit). */
 export function validateSheet(goals: Goal[]): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 
