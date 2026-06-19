@@ -52,7 +52,7 @@ export default async function ReportsPage() {
     <AppShell role="Admin">
       <div className="p-8 max-w-7xl mx-auto space-y-6">
         <div>
-          <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">BRD §4 · Reporting</div>
+          <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Reporting</div>
           <h1 className="font-serif text-4xl tracking-tight">Reports & exports</h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
             Achievement reports streamed as CSV. Completion dashboard summarises every employee&apos;s sheet state and check-in coverage.

@@ -36,7 +36,7 @@ export function EscalationsClient({
       <div className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
-            Bonus feature · BRD §5.3
+            Automation
           </div>
           <h1 className="font-serif text-4xl tracking-tight">Escalation engine</h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">

@@ -20,7 +20,7 @@ export default async function CyclesPage() {
           <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Configuration</div>
           <h1 className="font-serif text-4xl tracking-tight">Cycles</h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-            Quarterly check-in windows enforced from this configuration. Phase 1 opens 1 May; Q1 in July; Q2 in October; Q3 in January; Q4 in March-April.
+            Quarterly check-in windows are enforced from this configuration. Goal setting opens 1 May; Q1 in July; Q2 in October; Q3 in January; Q4 in March-April.
           </p>
         </div>
 

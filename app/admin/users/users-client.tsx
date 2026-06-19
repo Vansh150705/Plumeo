@@ -30,7 +30,7 @@ export function UsersClient({ users }: { users: (AppUser & { manager_name: strin
       <div className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
-            Bonus feature · BRD §5.1
+            Identity &amp; access
           </div>
           <h1 className="font-serif text-4xl tracking-tight">Users & Entra ID</h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">

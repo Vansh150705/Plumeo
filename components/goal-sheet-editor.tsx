@@ -139,7 +139,7 @@ export function GoalSheetEditor({
               {issues.length === 0 && goals.length > 0 && (
                 <div className="mt-4 flex items-center gap-2 text-xs text-emerald-400">
                   <CheckCircle2 className="size-3" />
-                  All BRD validations passed. Ready to submit.
+                  All checks passed. Ready to submit.
                 </div>
               )}
             </div>

@@ -33,7 +33,7 @@ export function AuditClient({ entries }: { entries: AuditEntry[] }) {
     <div className="p-8 max-w-7xl mx-auto space-y-5">
       <div>
         <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
-          BRD §4 · Audit trail
+          Compliance
         </div>
         <h1 className="font-serif text-4xl tracking-tight">Audit log</h1>
         <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
