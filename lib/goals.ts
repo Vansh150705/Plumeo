@@ -1,18 +1,13 @@
-/**
- * Core business logic for goal validation and progress scoring.
- *
- * All BRD rules from §2.1 (validation) and §2.2 (scoring) live here so they
- * stay consistent across client-side instant feedback and server-side enforcement.
- *
- * NOTHING in this file should import anything from React, Next.js, or Supabase.
- * It is deliberately a pure-function module.
+/*
+ * The goal validation and scoring rules live here, and only here, so the instant
+ * feedback in the browser and the checks on the server can never drift apart.
+ * Keep this file pure: no React, no Next.js, no Supabase imports.
  */
 
 import type { Goal, CheckIn, UomType, UomDirection } from './types';
 
-// =============================================================================
-// BRD §2.1 — Validation rules
-// =============================================================================
+// validation rules
+
 export const MIN_WEIGHTAGE = 10;
 export const MAX_WEIGHTAGE = 100;
 export const MAX_GOALS_PER_SHEET = 8;
@@ -95,19 +90,14 @@ export const totalWeightage = (goals: Goal[]): number =>
 
 export const canSubmit = (goals: Goal[]): boolean => validateSheet(goals).length === 0;
 
-// =============================================================================
-// BRD §2.2 — Scoring formulas
-// =============================================================================
-/**
- * Compute a 0–100 progress score for a single goal at a single check-in,
- * following the four BRD formulas exactly.
- *
- *   Numeric/% (higher better, Min direction): Achievement ÷ Target × 100
- *   Numeric/% (lower better,  Max direction): Target ÷ Achievement × 100
- *   Timeline:                                  Completed on/before deadline → 100, else 0
- *   Zero:                                       Achievement = 0 → 100, else 0
- *
- * Returns null if the inputs needed are missing (so we can show "—" in UI).
+// scoring formulas
+/*
+ * Turn one goal + one check-in into a 0-100 score. There are four shapes:
+ *   higher-is-better numbers -> achievement / target
+ *   lower-is-better numbers  -> target / achievement
+ *   timeline                 -> hit the deadline = 100, else 0
+ *   zero-based               -> stayed at zero = 100, else 0
+ * Returns null when the numbers we need aren't in yet, so the UI can show a dot.
  */
 export function computeScore(
   goal: Pick<Goal, 'uom' | 'direction' | 'target_numeric' | 'target_date'>,
@@ -129,12 +119,12 @@ export function computeScore(
   // Numeric or Percentage
   if (target_numeric == null || actual_numeric == null) return null;
   if (direction === 'min') {
-    // Higher is better — Achievement / Target
+    // higher is better: achievement over target
     if (target_numeric === 0) return actual_numeric >= 0 ? 100 : 0;
     return clamp((actual_numeric / target_numeric) * 100, 0, 150);
   }
   if (direction === 'max') {
-    // Lower is better — Target / Achievement
+    // lower is better: target over achievement
     if (actual_numeric === 0) return target_numeric >= 0 ? 100 : 0;
     return clamp((target_numeric / actual_numeric) * 100, 0, 150);
   }
@@ -160,9 +150,7 @@ export function computeSheetScore(
   return { score: weightedSum / weightedTotal, coverage: weightedTotal };
 }
 
-// =============================================================================
-// Quarter window enforcement (BRD §2.3 — check-in schedule)
-// =============================================================================
+// which quarter (if any) is open for check-ins right now
 export type CycleWindows = {
   goal_window_start: string;
   goal_window_end: string;
@@ -186,14 +174,12 @@ export function isGoalSettingWindowOpen(cycle: CycleWindows, now = new Date()): 
   return t >= new Date(cycle.goal_window_start).getTime() && t <= new Date(cycle.goal_window_end).getTime();
 }
 
-// =============================================================================
-// Helpers for display
-// =============================================================================
+// display helpers
 export function formatTarget(goal: Pick<Goal, 'uom' | 'target_numeric' | 'target_date'>): string {
   if (goal.uom === 'Zero') return '0';
-  if (goal.uom === 'Timeline') return goal.target_date ?? '—';
-  if (goal.uom === 'Percentage') return goal.target_numeric != null ? `${goal.target_numeric}%` : '—';
-  return goal.target_numeric != null ? goal.target_numeric.toLocaleString() : '—';
+  if (goal.uom === 'Timeline') return goal.target_date ?? '·';
+  if (goal.uom === 'Percentage') return goal.target_numeric != null ? `${goal.target_numeric}%` : '·';
+  return goal.target_numeric != null ? goal.target_numeric.toLocaleString() : '·';
 }
 
 export function uomLabel(uom: UomType, direction: UomDirection): string {
