@@ -1,13 +1,11 @@
--- =============================================================================
--- AtomQuest Goal Setting & Tracking Portal — Database Schema
--- =============================================================================
--- Designed to satisfy the AtomQuest Hackathon 2026 BRD end-to-end.
--- Includes Phase 1, Phase 2, audit trail, shared goals, escalations,
--- notifications, and Entra ID user mapping.
--- Uses Postgres + Supabase Row Level Security (RLS) for role-based access.
--- =============================================================================
+-- Plumeo - database schema for the goal setting & tracking portal.
+-- Covers the full lifecycle: goals, the audit trail, shared goals, escalations,
+-- notifications, and the Entra ID user mapping. Role-based access is enforced
+-- with Postgres + Supabase Row Level Security (RLS).
 
--- Enable UUID generation
+-- uuid + crypto helpers
+create extension if not exists "uuid-ossp";
+create extension if not exists "pgcrypto";
 create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
 
@@ -34,7 +32,7 @@ create table public.users (
   role            user_role not null default 'Employee',
   department      text,
   manager_id      uuid references public.users(id) on delete set null,
-  entra_groups    text[] default '{}',                           -- AAD group names — drives role mapping
+  entra_groups    text[] default '{}',                           -- AAD group names - drives role mapping
   avatar_color    text default '#f0b429',
   is_active       boolean default true,
   created_at      timestamptz default now(),
@@ -142,7 +140,7 @@ create table public.check_ins (
 create index checkins_goal_idx on public.check_ins(goal_id);
 
 -- =============================================================================
--- AUDIT LOG  (BRD §4: every change after lock — who, what, when)
+-- AUDIT LOG  (BRD §4: every change after lock - who, what, when)
 -- Captures changes on goals + check_ins + sheets.
 -- =============================================================================
 create table public.audit_log (
@@ -162,7 +160,7 @@ create index audit_actor_idx   on public.audit_log(actor_id);
 create index audit_time_idx    on public.audit_log(occurred_at desc);
 
 -- =============================================================================
--- NOTIFICATIONS  (Email + Teams + InApp — see bonus §5.2)
+-- NOTIFICATIONS  (Email + Teams + InApp - see bonus §5.2)
 -- Stored as a queue so a worker / cron / preview-mode can render them.
 -- =============================================================================
 create table public.notifications (
@@ -180,7 +178,7 @@ create table public.notifications (
 create index notif_recipient_idx on public.notifications(recipient_id, read_at);
 
 -- =============================================================================
--- ESCALATIONS  (bonus §5.3 — configurable rule-based escalations)
+-- ESCALATIONS  (bonus §5.3 - configurable rule-based escalations)
 -- =============================================================================
 create table public.escalation_rules (
   id            uuid primary key default uuid_generate_v4(),
@@ -205,7 +203,7 @@ create table public.escalation_events (
 create index escalation_events_subject_idx on public.escalation_events(subject_id);
 
 -- =============================================================================
--- THRUST AREAS  (reference data — admin-configurable)
+-- THRUST AREAS  (reference data - admin-configurable)
 -- =============================================================================
 create table public.thrust_areas (
   id          uuid primary key default uuid_generate_v4(),
@@ -215,7 +213,7 @@ create table public.thrust_areas (
 );
 
 -- =============================================================================
--- ROW LEVEL SECURITY  — enforces role separation at the DB layer.
+-- ROW LEVEL SECURITY  - enforces role separation at the DB layer.
 -- This is the real "cost optimisation" win: no separate auth service required.
 -- =============================================================================
 alter table public.users           enable row level security;
@@ -251,7 +249,7 @@ create policy "users_update_self_or_admin" on public.users for update
 create policy "users_insert_admin" on public.users for insert
   with check (current_user_role() = 'Admin');
 
--- CYCLES — read all, write Admin
+-- CYCLES - read all, write Admin
 create policy "cycles_select_all" on public.cycles for select using (true);
 create policy "cycles_admin_write" on public.cycles for all
   using (current_user_role() = 'Admin') with check (current_user_role() = 'Admin');
@@ -271,7 +269,7 @@ create policy "sheets_owner_create" on public.goal_sheets for insert with check 
   employee_id = auth.uid() or current_user_role() = 'Admin'
 );
 
--- GOALS — mirror sheet policy via join
+-- GOALS - mirror sheet policy via join
 create policy "goals_select" on public.goals for select using (
   exists(
     select 1 from public.goal_sheets s
@@ -309,7 +307,7 @@ create policy "checkins_modify" on public.check_ins for all using (
   )
 );
 
--- AUDIT LOG — Admin reads all, others read own
+-- AUDIT LOG - Admin reads all, others read own
 create policy "audit_select" on public.audit_log for select using (
   current_user_role() = 'Admin' or actor_id = auth.uid()
 );
@@ -320,7 +318,7 @@ create policy "notif_select_own" on public.notifications for select using (recip
 create policy "notif_update_own" on public.notifications for update using (recipient_id = auth.uid());
 create policy "notif_insert_any" on public.notifications for insert with check (true);
 
--- ESCALATIONS — Admin manages, all roles see events about themselves
+-- ESCALATIONS - Admin manages, all roles see events about themselves
 create policy "escal_rules_admin" on public.escalation_rules for all
   using (current_user_role() = 'Admin') with check (current_user_role() = 'Admin');
 create policy "escal_rules_select" on public.escalation_rules for select using (true);
@@ -335,7 +333,7 @@ create policy "thrust_admin_write" on public.thrust_areas for all
   using (current_user_role() = 'Admin') with check (current_user_role() = 'Admin');
 
 -- =============================================================================
--- TRIGGERS — updated_at maintenance
+-- TRIGGERS - updated_at maintenance
 -- =============================================================================
 create or replace function set_updated_at() returns trigger as $$
 begin new.updated_at = now(); return new; end;
@@ -347,7 +345,7 @@ create trigger trg_goals_updated      before update on public.goals      for eac
 create trigger trg_checkins_updated   before update on public.check_ins  for each row execute function set_updated_at();
 
 -- =============================================================================
--- VIEWS — convenience reads for dashboards
+-- VIEWS - convenience reads for dashboards
 -- =============================================================================
 create or replace view public.v_sheet_summary as
 select
