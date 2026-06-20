@@ -38,7 +38,6 @@ in instantly, the same way it would after a real Entra OAuth callback.
 - Thrust area, title, description, and weightage per goal
 - Four units of measure (Numeric, Percentage, Timeline, Zero-based), each with its own scoring formula
 - Weightage validation: total must equal 100%, min 10% per goal, max 8 goals, enforced on the client and again on the server (and validated with Zod at the server-action boundary)
-- AI goal assistant: describe your role in plain language and Claude drafts 3–5 well-formed goals (thrust area, UoM, target, weightages summing to 100) straight into the editor — degrades gracefully when no key is set
 - Manager (L1) approval flow: inline edit, return for rework, approve and lock
 - Shared goals: a manager or admin pushes one goal to many reports in a single action; weightage stays adjustable on each recipient
 
@@ -54,7 +53,7 @@ in instantly, the same way it would after a real Entra OAuth callback.
 - Immutable audit log: every change after lock recorded with before/after snapshots
 - CSV export for the achievement report and the audit log
 - Microsoft Entra ID SSO (mocked with the same response shape as Graph `/me`)
-- Email + MS Teams + in-app notifications on every lifecycle event, with real delivery to a Teams incoming webhook and an email relay — notifications carry an honest queued / sent / failed state, drained by a cron
+- In-app notifications on every lifecycle event, surfaced in a per-user inbox
 - Rule-based escalations on stale approvals *and overdue quarterly check-ins*, swept nightly by a Vercel cron (batched queries, no N+1)
 - Tested core: Vitest suite over every scoring formula and validation rule; GitHub Actions runs typecheck + tests + build on every push
 - Analytics: quarter-over-quarter trends, distribution by thrust area, department heatmap, manager effectiveness
@@ -69,9 +68,8 @@ in instantly, the same way it would after a real Entra OAuth callback.
 | Server | Next.js Server Actions + API routes | One project, one deploy |
 | Database | Supabase Postgres + Row Level Security | RLS *is* the authorisation layer |
 | Identity | Supabase Auth + mock Entra ID | Swaps to real Microsoft Graph with one HTTP call |
-| AI | Vercel AI Gateway + Claude (AI SDK v5) | Structured goal drafting via `generateObject`, no provider lock-in |
-| Notifications | Postgres queue + pluggable delivery | Real Teams/email transports, honest queued/sent/failed state |
-| Cron | Vercel Cron → escalations + notification drain | Nightly escalation sweep + daily delivery drain (inline send is immediate) |
+| Notifications | Postgres-backed in-app inbox | Per-user notifications on every lifecycle event |
+| Cron | Vercel Cron → escalations | Nightly escalation sweep (batched queries, no N+1) |
 | Tests/CI | Vitest + GitHub Actions | Typecheck, unit tests, and build gated on every push |
 | Hosting | Vercel + Supabase, both free tier | $0/month at demo volumes |
 
@@ -107,10 +105,6 @@ npm run seed       # populate demo data (needs the service-role key)
 npm test           # run the Vitest suite
 npm run typecheck  # tsc --noEmit
 ```
-
-Optional integrations (all degrade gracefully when unset — see `.env.example`):
-the **AI goal assistant** needs an `AI_GATEWAY_API_KEY`; **real notification
-delivery** needs `TEAMS_WEBHOOK_URL` and/or `EMAIL_WEBHOOK_URL`.
 
 ---
 
