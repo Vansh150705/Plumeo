@@ -1,11 +1,8 @@
--- =============================================================================
--- SEED DATA — Demo organisation for hackathon judges
--- =============================================================================
--- Three roles, three departments, sheets in every workflow state so judges
--- see Draft / Submitted / Returned / Approved without clicking around.
--- =============================================================================
+-- Reference + demo data: a small org with three roles and three departments,
+-- and goal sheets parked in every workflow state (Draft / Submitted / Returned /
+-- Approved) so the app has something to show straight away.
 
--- Thrust areas (BRD §2.1)
+-- thrust areas
 insert into public.thrust_areas (name, description) values
   ('Revenue Growth',          'Top-line growth, sales, new accounts'),
   ('Operational Excellence',  'Process efficiency, TAT, throughput'),
@@ -17,8 +14,8 @@ insert into public.thrust_areas (name, description) values
   ('Safety & Quality',        'Zero-incident targets, defect rate')
 on conflict (name) do nothing;
 
--- Active cycle: FY 2026-27 (1 May 2026 → 30 Apr 2027)
--- The goal-setting window is OPEN as of the hackathon submission window (May 16-18, 2026)
+-- the active cycle: FY 2026-27 (1 May 2026 to 30 Apr 2027)
+-- the goal-setting window is open from 1 May to 30 Jun 2026
 insert into public.cycles (
   id, name, fiscal_year,
   goal_window_start, goal_window_end,
@@ -37,20 +34,18 @@ insert into public.cycles (
   true
 ) on conflict (id) do nothing;
 
--- Escalation rules (BRD §5.3)
+-- escalation rules
 insert into public.escalation_rules (name, trigger_type, threshold_days, escalate_to, is_active) values
   ('Goal submission overdue',          'goal_not_submitted', 10, 'Employee',  true),
-  ('Goal submission — escalate to mgr','goal_not_submitted', 15, 'Manager',   true),
+  ('Goal submission overdue (L2)',     'goal_not_submitted', 15, 'Manager',   true),
   ('Approval pending',                 'approval_pending',    7, 'Manager',   true),
-  ('Approval — escalate to HR',        'approval_pending',   14, 'HR',        true),
+  ('Approval pending (HR)',            'approval_pending',   14, 'HR',        true),
   ('Quarterly check-in overdue',       'checkin_overdue',     5, 'Employee',  true),
-  ('Check-in — escalate to skip',      'checkin_overdue',    10, 'SkipLevel', true)
+  ('Check-in overdue (skip-level)',    'checkin_overdue',    10, 'SkipLevel', true)
 on conflict do nothing;
 
--- =============================================================================
--- DEMO USERS  — note: these UUIDs MUST match auth.users IDs created by seed.ts
--- The TypeScript seed script reads these and provisions matching auth records.
--- =============================================================================
+-- demo users: these UUIDs must match the auth.users IDs created by scripts/seed.ts,
+-- which reads this list and provisions the matching auth records.
 -- We insert with placeholder UUIDs; the seed script in scripts/seed.ts upserts
 -- corresponding auth.users via the Supabase admin API.
 -- =============================================================================
