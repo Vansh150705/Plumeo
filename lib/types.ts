@@ -103,6 +103,8 @@ export interface Notification {
   deep_link: string | null;
   payload: any;
   sent_at: string | null;
+  delivery_error: string | null;
+  attempts: number;
   read_at: string | null;
   created_at: string;
 }

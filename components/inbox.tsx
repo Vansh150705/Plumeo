@@ -48,7 +48,7 @@ export function Inbox({ notifications: initial }: { notifications: Notification[
           <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Inbox</div>
           <h1 className="font-serif text-4xl tracking-tight">{unreadCount} unread</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Multi-channel notifications: Email and Teams ship via your IdP; In-App lives here.
+            Multi-channel notifications: Email and Teams ship to their configured transports; In-App lives here.
           </p>
         </div>
         {unreadCount > 0 && (
@@ -105,6 +105,13 @@ export function Inbox({ notifications: initial }: { notifications: Notification[
                       <Pill variant={n.channel === 'Email' ? 'blue' : n.channel === 'Teams' ? 'purple' : 'gray'}>
                         {n.channel}
                       </Pill>
+                      {n.channel !== 'InApp' && (
+                        n.sent_at
+                          ? <Pill variant="green">Sent</Pill>
+                          : n.delivery_error
+                            ? <span title={n.delivery_error} className="cursor-help"><Pill variant="red">Failed</Pill></span>
+                            : <Pill variant="gray">Queued</Pill>
+                      )}
                       {!n.read_at && <Pill variant="gold">New</Pill>}
                       <span className="text-[11px] text-muted-foreground ml-auto">{fmtRelative(n.created_at)}</span>
                     </div>

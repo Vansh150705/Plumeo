@@ -13,6 +13,7 @@ import {
   feedbackInputSchema,
   nonEmptyComment,
 } from '@/lib/validation';
+import { deliverNotifications, isDeliveryConfigured } from '@/lib/notifications/delivery';
 
 // pull the signed-in AppUser, or send them back to the landing page
 async function requireUser() {
@@ -60,12 +61,22 @@ async function notify(args: {
     body: args.body,
     deep_link: args.deep_link ?? null,
     payload: args.payload ?? null,
-    // In a real deployment a worker flips sent_at when it ships to SES / MS Graph.
-    // For demo, we set sent_at immediately on Email/Teams so the notification
-    // center shows a realistic "Sent" state without an actual delivery worker.
-    sent_at: channel === 'InApp' ? null : new Date().toISOString(),
+    // Rows start un-sent. The delivery layer (lib/notifications/delivery.ts)
+    // flips sent_at once it actually ships to Teams / email; in-app rows are
+    // read straight from the table and never need delivery.
+    sent_at: null,
   }));
   await supabase.from('notifications').insert(rows);
+
+  // Best-effort immediate delivery of the external channels. Never let a
+  // delivery hiccup fail the surrounding action; the cron drain is the backstop.
+  if (isDeliveryConfigured()) {
+    try {
+      await deliverNotifications();
+    } catch {
+      /* swallowed: queued rows remain for the next drain */
+    }
+  }
 }
 
 // ----- sheet actions -----
