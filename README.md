@@ -71,7 +71,7 @@ in instantly, the same way it would after a real Entra OAuth callback.
 | Identity | Supabase Auth + mock Entra ID | Swaps to real Microsoft Graph with one HTTP call |
 | AI | Vercel AI Gateway + Claude (AI SDK v5) | Structured goal drafting via `generateObject`, no provider lock-in |
 | Notifications | Postgres queue + pluggable delivery | Real Teams/email transports, honest queued/sent/failed state |
-| Cron | Vercel Cron → escalations + notification drain | Nightly sweep + 15-min delivery drain |
+| Cron | Vercel Cron → escalations + notification drain | Nightly escalation sweep + daily delivery drain (inline send is immediate) |
 | Tests/CI | Vitest + GitHub Actions | Typecheck, unit tests, and build gated on every push |
 | Hosting | Vercel + Supabase, both free tier | $0/month at demo volumes |
 
