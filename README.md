@@ -37,7 +37,8 @@ in instantly, the same way it would after a real Entra OAuth callback.
 **Goal creation & approval**
 - Thrust area, title, description, and weightage per goal
 - Four units of measure (Numeric, Percentage, Timeline, Zero-based), each with its own scoring formula
-- Weightage validation: total must equal 100%, min 10% per goal, max 8 goals, enforced on the client and again on the server
+- Weightage validation: total must equal 100%, min 10% per goal, max 8 goals, enforced on the client and again on the server (and validated with Zod at the server-action boundary)
+- AI goal assistant: describe your role in plain language and Claude drafts 3–5 well-formed goals (thrust area, UoM, target, weightages summing to 100) straight into the editor — degrades gracefully when no key is set
 - Manager (L1) approval flow: inline edit, return for rework, approve and lock
 - Shared goals: a manager or admin pushes one goal to many reports in a single action; weightage stays adjustable on each recipient
 
@@ -46,14 +47,16 @@ in instantly, the same way it would after a real Entra OAuth callback.
 - Status per goal: Not Started, On Track, At Risk, Completed
 - Manager check-in comments with a structured log
 - Live weighted sheet score, recomputed on every check-in
+- 360° / peer feedback: peers and skip-level managers leave structured rating + comment feedback, shared with the person or kept private to their management chain (enforced by RLS)
 
 **Across the board**
 - Role-based access enforced with Row Level Security at the database layer
 - Immutable audit log: every change after lock recorded with before/after snapshots
 - CSV export for the achievement report and the audit log
 - Microsoft Entra ID SSO (mocked with the same response shape as Graph `/me`)
-- Email + MS Teams + in-app notifications on every lifecycle event
-- Rule-based escalations on stale approvals, swept nightly by a Vercel cron
+- Email + MS Teams + in-app notifications on every lifecycle event, with real delivery to a Teams incoming webhook and an email relay — notifications carry an honest queued / sent / failed state, drained by a cron
+- Rule-based escalations on stale approvals *and overdue quarterly check-ins*, swept nightly by a Vercel cron (batched queries, no N+1)
+- Tested core: Vitest suite over every scoring formula and validation rule; GitHub Actions runs typecheck + tests + build on every push
 - Analytics: quarter-over-quarter trends, distribution by thrust area, department heatmap, manager effectiveness
 
 ---
@@ -66,8 +69,10 @@ in instantly, the same way it would after a real Entra OAuth callback.
 | Server | Next.js Server Actions + API routes | One project, one deploy |
 | Database | Supabase Postgres + Row Level Security | RLS *is* the authorisation layer |
 | Identity | Supabase Auth + mock Entra ID | Swaps to real Microsoft Graph with one HTTP call |
-| Notifications | Postgres queue table | Channel-agnostic, testable without external accounts |
-| Cron | Vercel Cron → `/api/cron/escalations` | Nightly escalation sweep |
+| AI | Vercel AI Gateway + Claude (AI SDK v5) | Structured goal drafting via `generateObject`, no provider lock-in |
+| Notifications | Postgres queue + pluggable delivery | Real Teams/email transports, honest queued/sent/failed state |
+| Cron | Vercel Cron → escalations + notification drain | Nightly escalation sweep + daily delivery drain (inline send is immediate) |
+| Tests/CI | Vitest + GitHub Actions | Typecheck, unit tests, and build gated on every push |
 | Hosting | Vercel + Supabase, both free tier | $0/month at demo volumes |
 
 ---
@@ -98,7 +103,14 @@ npm install
 # add Supabase keys to .env.local (see .env.example)
 npm run dev        # http://localhost:3000
 npm run seed       # populate demo data (needs the service-role key)
+
+npm test           # run the Vitest suite
+npm run typecheck  # tsc --noEmit
 ```
+
+Optional integrations (all degrade gracefully when unset — see `.env.example`):
+the **AI goal assistant** needs an `AI_GATEWAY_API_KEY`; **real notification
+delivery** needs `TEAMS_WEBHOOK_URL` and/or `EMAIL_WEBHOOK_URL`.
 
 ---
 

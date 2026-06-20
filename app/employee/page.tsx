@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getOrCreateMySheet } from '@/lib/actions';
 import { AppShell } from '@/components/app-shell';
 import { GoalSheetEditor } from '@/components/goal-sheet-editor';
+import { isAiConfigured } from '@/lib/ai-config';
 
 export default async function EmployeePage() {
   const supabase = createClient();
@@ -29,6 +30,7 @@ export default async function EmployeePage() {
         cycle={cycle!}
         thrustAreas={thrustAreas?.map(t => t.name) ?? []}
         readOnly={false}
+        aiEnabled={isAiConfigured()}
       />
     </AppShell>
   );

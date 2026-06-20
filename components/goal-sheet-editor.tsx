@@ -12,6 +12,7 @@ import { upsertGoal, deleteGoal, submitSheet } from '@/lib/actions';
 import { validateSheet, totalWeightage, MAX_GOALS_PER_SHEET, REQUIRED_TOTAL_WEIGHTAGE, MIN_WEIGHTAGE, formatTarget, uomLabel } from '@/lib/goals';
 import type { Goal, GoalSheet, Cycle } from '@/lib/types';
 import { cn, fmtDate } from '@/lib/utils';
+import { AiGoalAssistant } from '@/components/ai-goal-assistant';
 
 export function GoalSheetEditor({
   sheet,
@@ -19,12 +20,14 @@ export function GoalSheetEditor({
   cycle,
   thrustAreas,
   readOnly,
+  aiEnabled,
 }: {
   sheet: GoalSheet;
   goals: Goal[];
   cycle: Cycle;
   thrustAreas: string[];
   readOnly: boolean;
+  aiEnabled?: boolean;
 }) {
   const [goals, setGoals] = useState<Goal[]>(initialGoals);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -57,6 +60,15 @@ export function GoalSheetEditor({
     if (!confirm('Delete this goal?')) return;
     const res = await deleteGoal(id);
     if (res.ok) setGoals(prev => prev.filter(g => g.id !== id));
+  }
+
+  // Persist each AI-drafted goal through the same upsert path as a hand-typed one.
+  async function handleApplyDrafts(drafts: Partial<Goal>[]) {
+    for (const draft of drafts) {
+      const res = await upsertGoal({ ...draft, sheet_id: sheet.id });
+      if (res.ok && res.goal) setGoals(prev => [...prev, res.goal!]);
+    }
+    router.refresh();
   }
 
   async function handleSubmit() {
@@ -154,11 +166,16 @@ export function GoalSheetEditor({
             <CardContent className="p-12 text-center">
               <div className="font-serif text-2xl mb-2">No goals yet</div>
               <div className="text-sm text-muted-foreground mb-4">
-                Start by adding your first goal for this cycle.
+                Start from scratch, or let the assistant draft a sheet you can refine.
               </div>
-              <Button onClick={() => setAddingNew(true)} disabled={locked}>
-                <Plus className="size-4" /> Add first goal
-              </Button>
+              <div className="flex flex-col items-center gap-3 max-w-sm mx-auto">
+                <Button onClick={() => setAddingNew(true)} disabled={locked}>
+                  <Plus className="size-4" /> Add first goal
+                </Button>
+                {aiEnabled && !locked && (
+                  <AiGoalAssistant onApply={handleApplyDrafts} disabled={locked} />
+                )}
+              </div>
             </CardContent>
           </Card>
         )}
@@ -193,12 +210,15 @@ export function GoalSheetEditor({
         )}
 
         {!addingNew && goals.length > 0 && goals.length < MAX_GOALS_PER_SHEET && !locked && (
-          <button
-            onClick={() => setAddingNew(true)}
-            className="w-full p-4 rounded-xl border border-dashed border-border hover:border-primary/40 hover:bg-accent/50 transition flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <Plus className="size-4" /> Add another goal ({MAX_GOALS_PER_SHEET - goals.length} remaining)
-          </button>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <button
+              onClick={() => setAddingNew(true)}
+              className="w-full p-4 rounded-xl border border-dashed border-border hover:border-primary/40 hover:bg-accent/50 transition flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <Plus className="size-4" /> Add another goal ({MAX_GOALS_PER_SHEET - goals.length} remaining)
+            </button>
+            {aiEnabled && <AiGoalAssistant onApply={handleApplyDrafts} disabled={locked} />}
+          </div>
         )}
       </div>
 
