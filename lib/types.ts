@@ -6,7 +6,7 @@ export type UomDirection = 'min' | 'max' | 'timeline' | 'zero';
 export type SheetStatus = 'Draft' | 'Submitted' | 'Returned' | 'Approved' | 'Locked';
 export type GoalProgress = 'NotStarted' | 'OnTrack' | 'AtRisk' | 'Completed';
 export type CheckInQuarter = 'Q1' | 'Q2' | 'Q3' | 'Q4';
-export type NotifChannel = 'Email' | 'Teams' | 'InApp';
+export type NotifChannel = 'InApp';
 export type EscalationLevel = 'Employee' | 'Manager' | 'SkipLevel' | 'HR';
 
 export interface AppUser {

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { validateSheet, computeScore, activeQuarter } from '@/lib/goals';
-import type { Goal, CheckIn, NotifChannel } from '@/lib/types';
+import type { Goal, CheckIn } from '@/lib/types';
 import { ok, fail } from '@/lib/result';
 import {
   parseInput,
@@ -13,7 +13,6 @@ import {
   feedbackInputSchema,
   nonEmptyComment,
 } from '@/lib/validation';
-import { deliverNotifications, isDeliveryConfigured } from '@/lib/notifications/delivery';
 
 // pull the signed-in AppUser, or send them back to the landing page
 async function requireUser() {
@@ -43,40 +42,23 @@ async function audit(
   });
 }
 
-// fans one event out into Email + Teams + in-app notification rows
+// writes one in-app notification row, read straight from the inbox
 async function notify(args: {
   recipient_id: string;
   subject: string;
   body: string;
   deep_link?: string;
-  channels?: NotifChannel[];
   payload?: any;
 }) {
   const { supabase } = await requireUser();
-  const channels = args.channels ?? ['Email', 'Teams', 'InApp'];
-  const rows = channels.map(channel => ({
+  await supabase.from('notifications').insert({
     recipient_id: args.recipient_id,
-    channel,
+    channel: 'InApp',
     subject: args.subject,
     body: args.body,
     deep_link: args.deep_link ?? null,
     payload: args.payload ?? null,
-    // Rows start un-sent. The delivery layer (lib/notifications/delivery.ts)
-    // flips sent_at once it actually ships to Teams / email; in-app rows are
-    // read straight from the table and never need delivery.
-    sent_at: null,
-  }));
-  await supabase.from('notifications').insert(rows);
-
-  // Best-effort immediate delivery of the external channels. Never let a
-  // delivery hiccup fail the surrounding action; the cron drain is the backstop.
-  if (isDeliveryConfigured()) {
-    try {
-      await deliverNotifications();
-    } catch {
-      /* swallowed: queued rows remain for the next drain */
-    }
-  }
+  });
 }
 
 // ----- sheet actions -----

@@ -4,10 +4,6 @@
     {
       "path": "/api/cron/escalations",
       "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/notifications",
-      "schedule": "0 3 * * *"
     }
   ]
 }

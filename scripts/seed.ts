@@ -241,57 +241,44 @@ async function main() {
   console.log('\n5/5 Seeding notifications + escalations...');
   const now = new Date();
 
-  // Notifications across channels
+  // In-app notifications
   await admin.from('notifications').insert([
     {
-      recipient_id: oidToUserId['aad-9002'], channel: 'Email',
+      recipient_id: oidToUserId['aad-9002'], channel: 'InApp',
       subject: 'Neha Iyer submitted her goal sheet',
       body: 'Neha Iyer (Sales) submitted 5 goals for your review.',
       deep_link: '/manager/approvals',
-      sent_at: new Date(now.getTime() - 5 * 86400000).toISOString(),
     },
     {
-      recipient_id: oidToUserId['aad-9002'], channel: 'Teams',
-      subject: 'Neha Iyer submitted her goal sheet',
-      body: 'Adaptive card delivered to MS Teams. Review in goal portal.',
-      deep_link: '/manager/approvals',
-      sent_at: new Date(now.getTime() - 5 * 86400000).toISOString(),
-    },
-    {
-      recipient_id: oidToUserId['aad-9006'], channel: 'Email',
+      recipient_id: oidToUserId['aad-9006'], channel: 'InApp',
       subject: 'Your goal sheet was approved',
       body: 'Lakshmi Raman approved your goals. Your sheet is now locked for the cycle.',
       deep_link: '/employee',
-      sent_at: new Date(now.getTime() - 28 * 86400000).toISOString(),
       read_at: new Date(now.getTime() - 27 * 86400000).toISOString(),
     },
     {
-      recipient_id: oidToUserId['aad-9007'], channel: 'Email',
+      recipient_id: oidToUserId['aad-9007'], channel: 'InApp',
       subject: 'Your goal sheet was returned for rework',
       body: 'Lakshmi Raman sent your sheet back with a comment.',
       deep_link: '/employee',
-      sent_at: new Date(now.getTime() - 6 * 86400000).toISOString(),
     },
     {
-      recipient_id: oidToUserId['aad-9006'], channel: 'Teams',
+      recipient_id: oidToUserId['aad-9006'], channel: 'InApp',
       subject: 'New shared goal: "Ship 4 major features"',
       body: 'Lakshmi Raman pushed a departmental goal to your sheet. Weightage adjustable.',
       deep_link: '/employee',
-      sent_at: new Date(now.getTime() - 25 * 86400000).toISOString(),
     },
     {
       recipient_id: oidToUserId['aad-9001'], channel: 'InApp',
       subject: 'Escalation: Approval pending',
       body: 'Neha Iyer: submitted 5 days ago, still awaiting approval.',
       deep_link: '/admin/escalations',
-      sent_at: null,
     },
     {
       recipient_id: oidToUserId['aad-9001'], channel: 'InApp',
       subject: 'Escalation: Goal sheet not submitted',
       body: 'Rohan Kapoor: still in Draft 12 days after the cycle opened.',
       deep_link: '/admin/escalations',
-      sent_at: null,
     },
   ]);
 

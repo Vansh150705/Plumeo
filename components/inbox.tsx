@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Pill } from '@/components/ui/pill';
 import { Button } from '@/components/ui/button';
-import { Mail, MessageSquareText, Bell, Check, ExternalLink } from 'lucide-react';
+import { Bell, Check, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { fmtRelative, cn } from '@/lib/utils';
 import type { Notification } from '@/lib/types';
@@ -12,13 +12,12 @@ import { createClient } from '@/lib/supabase/client';
 
 export function Inbox({ notifications: initial }: { notifications: Notification[] }) {
   const [notifications, setNotifications] = useState(initial);
-  const [filter, setFilter] = useState<'all' | 'unread' | 'Email' | 'Teams' | 'InApp'>('all');
+  const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [pending, startTransition] = useTransition();
 
   const filtered = notifications.filter(n => {
     if (filter === 'all') return true;
-    if (filter === 'unread') return !n.read_at;
-    return n.channel === filter;
+    return !n.read_at;
   });
 
   async function markRead(id: string) {
@@ -48,7 +47,7 @@ export function Inbox({ notifications: initial }: { notifications: Notification[
           <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Inbox</div>
           <h1 className="font-serif text-4xl tracking-tight">{unreadCount} unread</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Multi-channel notifications: Email and Teams ship to their configured transports; In-App lives here.
+            In-app notifications for every lifecycle event.
           </p>
         </div>
         {unreadCount > 0 && (
@@ -60,7 +59,7 @@ export function Inbox({ notifications: initial }: { notifications: Notification[
 
       {/* Filter tabs */}
       <div className="flex gap-2 border-b border-border">
-        {(['all', 'unread', 'Email', 'Teams', 'InApp'] as const).map(f => (
+        {(['all', 'unread'] as const).map(f => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -69,7 +68,7 @@ export function Inbox({ notifications: initial }: { notifications: Notification[
               filter === f ? 'text-primary border-primary' : 'text-muted-foreground border-transparent hover:text-foreground',
             )}
           >
-            {f === 'all' ? 'All' : f}
+            {f === 'all' ? 'All' : 'Unread'}
             {f === 'unread' && unreadCount > 0 && (
               <Pill variant="gold" className="ml-1.5">{unreadCount}</Pill>
             )}
@@ -96,22 +95,10 @@ export function Inbox({ notifications: initial }: { notifications: Notification[
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   <div className="size-9 rounded-lg border border-border bg-background grid place-items-center shrink-0">
-                    {n.channel === 'Email' ? <Mail className="size-4 text-blue-400" />
-                      : n.channel === 'Teams' ? <MessageSquareText className="size-4 text-purple-400" />
-                      : <Bell className="size-4 text-muted-foreground" />}
+                    <Bell className="size-4 text-muted-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <Pill variant={n.channel === 'Email' ? 'blue' : n.channel === 'Teams' ? 'purple' : 'gray'}>
-                        {n.channel}
-                      </Pill>
-                      {n.channel !== 'InApp' && (
-                        n.sent_at
-                          ? <Pill variant="green">Sent</Pill>
-                          : n.delivery_error
-                            ? <span title={n.delivery_error} className="cursor-help"><Pill variant="red">Failed</Pill></span>
-                            : <Pill variant="gray">Queued</Pill>
-                      )}
                       {!n.read_at && <Pill variant="gold">New</Pill>}
                       <span className="text-[11px] text-muted-foreground ml-auto">{fmtRelative(n.created_at)}</span>
                     </div>

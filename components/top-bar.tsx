@@ -92,9 +92,7 @@ export function TopBar({ user, notifications: initialNotifications, onMenu }: { 
                         className="block w-full text-left px-4 py-3 hover:bg-accent border-b border-border last:border-0 transition"
                       >
                         <div className="flex items-start gap-2 mb-1">
-                          <Pill variant={n.channel === 'Email' ? 'blue' : n.channel === 'Teams' ? 'purple' : 'gray'}>
-                            {n.channel}
-                          </Pill>
+                          {!n.read_at && <Pill variant="gold">New</Pill>}
                           <div className="text-xs text-muted-foreground ml-auto">{fmtRelative(n.created_at)}</div>
                         </div>
                         <div className="text-sm font-medium mb-0.5">{n.subject}</div>
