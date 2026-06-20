@@ -33,3 +33,4 @@ coverage/
 next-env.d.ts
 
 .vercel
+.playwright-mcp/

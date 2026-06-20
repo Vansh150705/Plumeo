@@ -68,7 +68,7 @@ export function SharedGoalsClient({ myGoals, reports }: { myGoals: Goal[]; repor
             <CheckCircle2 className="size-5 text-emerald-400" />
             <div className="text-sm">
               Goal pushed to <span className="font-semibold">{pushed.count}</span> report{pushed.count === 1 ? '' : 's'}.
-              Each has been notified via Email + Teams.
+              Each has been notified in-app.
             </div>
             <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setPushed(null)}>Dismiss</Button>
           </CardContent>

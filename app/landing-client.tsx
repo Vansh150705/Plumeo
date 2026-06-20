@@ -1002,7 +1002,7 @@ const FEATURES = [
   { icon: Users, title: 'Shared goals, one push', desc: 'Cascade a department KPI to many reports at once. Weightage adjustable, target kept in sync.' },
   { icon: Target, title: 'Four scoring models', desc: 'Numeric, percentage, timeline, zero-based; each with its own formula, validated twice.' },
   { icon: BarChart3, title: 'Analytics that land', desc: 'Quarter-over-quarter trends, distribution by thrust area, and manager effectiveness.' },
-  { icon: Bell, title: 'Notifications that reach', desc: 'Email, Teams, and in-app, fired on every lifecycle event and deep-linked back into the sheet.' },
+  { icon: Bell, title: 'Notifications that reach', desc: 'In-app notifications fired on every lifecycle event and deep-linked back into the sheet.' },
   { icon: GitBranch, title: 'Rule-based escalations', desc: 'Configurable thresholds on stale approvals, routed up the org hierarchy automatically.' },
   { icon: Lock, title: 'An audit trail that lasts', desc: 'Who changed what and when, with a before/after JSON diff and one-click CSV export.' },
 ];
