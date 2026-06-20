@@ -28,12 +28,20 @@ export default async function ManagerCheckinsPage() {
     .select('*')
     .in('goal_id', allGoalIds.length ? allGoalIds : ['00000000-0000-0000-0000-000000000000']);
 
+  const { data: feedback } = await supabase
+    .from('feedback')
+    .select('*, author:users!feedback_author_id_fkey(id, full_name)')
+    .in('subject_id', reportIds.length ? reportIds : ['00000000-0000-0000-0000-000000000000'])
+    .order('created_at', { ascending: false });
+
   return (
     <AppShell role="Manager">
       <ManagerCheckinsClient
         reports={reports ?? []}
         sheets={(sheets ?? []) as any}
         checkIns={checkIns ?? []}
+        feedback={(feedback ?? []) as any}
+        currentUserId={user.id}
         cycle={cycle!}
         currentQuarter={activeQuarter(cycle!) ?? 'Q1'}
       />

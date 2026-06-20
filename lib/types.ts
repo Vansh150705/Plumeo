@@ -126,3 +126,22 @@ export interface EscalationEvent {
   resolved_at: string | null;
   triggered_at: string;
 }
+
+export type FeedbackVisibility = 'Manager' | 'Private';
+
+export interface Feedback {
+  id: string;
+  cycle_id: string | null;
+  subject_id: string;
+  author_id: string;
+  goal_id: string | null;
+  rating: number;
+  comment: string;
+  visibility: FeedbackVisibility;
+  created_at: string;
+}
+
+/** A feedback row joined with the author's display name, for read views. */
+export interface FeedbackWithAuthor extends Feedback {
+  author?: { id: string; full_name: string } | null;
+}

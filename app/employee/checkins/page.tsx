@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/app-shell';
 import { CheckInWorkspace } from '@/components/checkin-workspace';
+import { FeedbackPanel } from '@/components/feedback-panel';
 import { activeQuarter } from '@/lib/goals';
 
 export default async function EmployeeCheckinsPage() {
@@ -30,6 +31,12 @@ export default async function EmployeeCheckinsPage() {
 
   const currentQuarter = activeQuarter(cycle!) ?? 'Q1';
 
+  const { data: feedback } = await supabase
+    .from('feedback')
+    .select('*, author:users!feedback_author_id_fkey(id, full_name)')
+    .eq('subject_id', user.id)
+    .order('created_at', { ascending: false });
+
   return (
     <AppShell role="Employee">
       <CheckInWorkspace
@@ -40,6 +47,15 @@ export default async function EmployeeCheckinsPage() {
         sheetStatus={sheet.status}
         viewerRole="Employee"
       />
+      <div className="px-8 pb-10 max-w-4xl mx-auto w-full">
+        <FeedbackPanel
+          subjectId={user.id}
+          subjectName=""
+          currentUserId={user.id}
+          canGive={false}
+          initialFeedback={(feedback ?? []) as any}
+        />
+      </div>
     </AppShell>
   );
 }

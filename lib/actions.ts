@@ -10,6 +10,7 @@ import {
   goalInputSchema,
   checkInInputSchema,
   pushSharedGoalSchema,
+  feedbackInputSchema,
   nonEmptyComment,
 } from '@/lib/validation';
 
@@ -420,6 +421,60 @@ export async function managerCheckIn(check_in_id: string, comment: string) {
     .single();
   await audit('check_in', check_in_id, 'manager_review', before, after);
   revalidatePath('/manager');
+  return ok({});
+}
+
+// ----- 360 / peer feedback -----
+
+/** Leave structured feedback (rating + comment) about a colleague. */
+export async function giveFeedback(input: unknown) {
+  const { supabase, appUser } = await requireUser();
+
+  const parsed = parseInput(feedbackInputSchema, input);
+  if (!parsed.ok) return fail(parsed.error);
+  const data = parsed.data;
+  if (data.subject_id === appUser.id) return fail('You cannot leave feedback about yourself.');
+
+  const { data: cycle } = await supabase.from('cycles').select('id').eq('is_active', true).maybeSingle();
+
+  const { data: row, error } = await supabase
+    .from('feedback')
+    .insert({
+      cycle_id: cycle?.id ?? null,
+      subject_id: data.subject_id,
+      author_id: appUser.id,
+      goal_id: data.goal_id ?? null,
+      rating: data.rating,
+      comment: data.comment,
+      visibility: data.visibility,
+    })
+    .select()
+    .single();
+  if (error) return fail(error.message);
+
+  // Only ping the subject when the feedback is meant to be shared with them.
+  if (data.visibility === 'Manager') {
+    await notify({
+      recipient_id: data.subject_id,
+      subject: `New feedback from ${appUser.full_name}`,
+      body: `${appUser.full_name} shared feedback on your goals: "${data.comment}"`,
+      deep_link: '/employee/checkins',
+      payload: { event: 'feedback_received', feedback_id: row.id },
+    });
+  }
+
+  revalidatePath('/manager');
+  revalidatePath('/employee');
+  return ok({ feedback: row });
+}
+
+/** Withdraw feedback you authored. */
+export async function withdrawFeedback(feedback_id: string) {
+  const { supabase } = await requireUser();
+  const { error } = await supabase.from('feedback').delete().eq('id', feedback_id);
+  if (error) return fail(error.message);
+  revalidatePath('/manager');
+  revalidatePath('/employee');
   return ok({});
 }
 
