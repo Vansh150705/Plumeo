@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea, Label } from '@/components/ui/input';
 import { StatusPill, Pill } from '@/components/ui/pill';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Trash2, Lock, Save, AlertCircle, CheckCircle2, Send, Pencil, Info, Sparkles } from 'lucide-react';
 import { upsertGoal, deleteGoal, submitSheet } from '@/lib/actions';
 import { validateSheet, totalWeightage, MAX_GOALS_PER_SHEET, REQUIRED_TOTAL_WEIGHTAGE, MIN_WEIGHTAGE, formatTarget, uomLabel } from '@/lib/goals';

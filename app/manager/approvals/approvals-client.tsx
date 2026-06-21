@@ -10,9 +10,9 @@ import { Pill, StatusPill } from '@/components/ui/pill';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { CheckCircle2, RotateCcw, AlertCircle, Send, Lock } from 'lucide-react';
 import { approveSheet, returnSheet, upsertGoal } from '@/lib/actions';
-import { validateSheet, totalWeightage, formatTarget, uomLabel, MIN_WEIGHTAGE, MAX_GOALS_PER_SHEET } from '@/lib/goals';
+import { validateSheet, totalWeightage, formatTarget, uomLabel, MAX_GOALS_PER_SHEET } from '@/lib/goals';
 import type { Goal, GoalSheet, Cycle, AppUser } from '@/lib/types';
-import { fmtDate, fmtRelative, cn } from '@/lib/utils';
+import { fmtRelative, cn } from '@/lib/utils';
 
 type SheetWithGoals = GoalSheet & { goals: Goal[]; employee: AppUser };
 

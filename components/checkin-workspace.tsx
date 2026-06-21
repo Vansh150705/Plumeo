@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea, Label } from '@/components/ui/input';
 import { Pill, ProgressPill, StatusPill } from '@/components/ui/pill';
-import { Save, Lock, MessageSquare, CheckCircle2, AlertTriangle, Calendar, Sparkles, AlertCircle } from 'lucide-react';
+import { Save, Lock, MessageSquare, CheckCircle2, Sparkles, AlertCircle } from 'lucide-react';
 import { upsertCheckIn, managerCheckIn } from '@/lib/actions';
 import { computeScore, formatTarget, uomLabel } from '@/lib/goals';
 import type { Goal, CheckIn, CheckInQuarter, Cycle, GoalProgress, SheetStatus, UserRole } from '@/lib/types';

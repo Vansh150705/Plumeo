@@ -4,10 +4,10 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input, Label } from '@/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { Avatar } from '@/components/ui/avatar';
 import { Pill } from '@/components/ui/pill';
-import { Users, Send, CheckCircle2, Share2 } from 'lucide-react';
+import { CheckCircle2, Share2 } from 'lucide-react';
 import { pushSharedGoal } from '@/lib/actions';
 import { formatTarget, uomLabel } from '@/lib/goals';
 import type { Goal, AppUser } from '@/lib/types';
@@ -20,8 +20,6 @@ export function SharedGoalsClient({ myGoals, reports }: { myGoals: Goal[]; repor
   const [pending, startTransition] = useTransition();
   const [pushed, setPushed] = useState<{ count: number } | null>(null);
   const router = useRouter();
-
-  const picked = myGoals.find(g => g.id === pickedGoalId);
 
   function toggle(id: string) {
     setSelectedRecipients(prev => {

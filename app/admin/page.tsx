@@ -2,10 +2,9 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/app-shell';
 import { Card, CardContent } from '@/components/ui/card';
-import { Pill, StatusPill } from '@/components/ui/pill';
-import { Avatar } from '@/components/ui/avatar';
+import { Pill } from '@/components/ui/pill';
 import Link from 'next/link';
-import { Users, FileCheck, AlertTriangle, TrendingUp, BarChart3, Bell, ScrollText, GitBranch } from 'lucide-react';
+import { Users, FileCheck, AlertTriangle, TrendingUp, BarChart3, ScrollText, GitBranch } from 'lucide-react';
 import { fmtRelative } from '@/lib/utils';
 
 export default async function AdminHome() {

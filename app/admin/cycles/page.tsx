@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/app-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Pill } from '@/components/ui/pill';
-import { Calendar, Lock, Clock, CheckCircle2 } from 'lucide-react';
 import { fmtDate } from '@/lib/utils';
 import { activeQuarter, isGoalSettingWindowOpen } from '@/lib/goals';
 

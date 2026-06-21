@@ -35,8 +35,3 @@ export function colorFor(id: string): string {
   for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
   return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
 }
-
-export function pct(n: number | null | undefined, digits = 0): string {
-  if (n == null || !isFinite(n)) return '·';
-  return `${n.toFixed(digits)}%`;
-}

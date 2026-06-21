@@ -153,7 +153,7 @@ async function main() {
   };
 
   // Arjun (Sales Director)
-  const arjunGoalIds = await addGoals(arjunSheet.id, [
+  await addGoals(arjunSheet.id, [
     { thrust_area: 'Revenue Growth', title: 'Hit ₹12 Cr team ARR', uom: 'Numeric', direction: 'min', target_numeric: 12_00_00_000, weightage: 40 },
     { thrust_area: 'Customer Experience', title: 'Team NPS ≥ 55', uom: 'Numeric', direction: 'min', target_numeric: 55, weightage: 25 },
     { thrust_area: 'People & Culture', title: 'Attrition < 8%', uom: 'Percentage', direction: 'max', target_numeric: 8, weightage: 20 },
@@ -181,7 +181,7 @@ async function main() {
   ]);
 
   // Neha: Submitted, 5 goals
-  const nehaGoalIds = await addGoals(nehaSheet.id, [
+  await addGoals(nehaSheet.id, [
     { thrust_area: 'Revenue Growth', title: 'Close ₹4.2 Cr new ARR', uom: 'Numeric', direction: 'min', target_numeric: 4_20_00_000, weightage: 35 },
     { thrust_area: 'Customer Experience', title: 'Personal NPS ≥ 65', uom: 'Numeric', direction: 'min', target_numeric: 65, weightage: 20 },
     { thrust_area: 'Operational Excellence', title: 'Win-rate ≥ 30%', uom: 'Percentage', direction: 'min', target_numeric: 30, weightage: 20 },

@@ -6,7 +6,6 @@ import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
-import { cn } from '@/lib/utils';
 
 // navy + gold ramp (no bright purple/green -keeps the brand palette)
 const COLORS = ['#B8893A', '#14233D', '#34507C', '#6E83AC', '#C9A45F', '#41608C', '#9AAAC8', '#8A6A2E'];

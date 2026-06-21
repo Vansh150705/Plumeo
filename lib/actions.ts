@@ -187,24 +187,6 @@ export async function returnSheet(sheet_id: string, comment: string) {
   return ok({});
 }
 
-/** Admin reopens a locked sheet; from here on every edit is written to the audit log. */
-export async function unlockSheet(sheet_id: string, reason: string) {
-  const { supabase, appUser } = await requireUser();
-  if (appUser.role !== 'Admin') throw new Error('FORBIDDEN');
-  if (!parseInput(nonEmptyComment, reason).ok) return fail('Reason required.');
-
-  const { data: sheet } = await supabase
-    .from('goal_sheets')
-    .update({ status: 'Draft', locked_at: null, approved_at: null })
-    .eq('id', sheet_id)
-    .select()
-    .single();
-
-  await audit('sheet', sheet_id, 'unlock', null, sheet, reason);
-  revalidatePath('/admin');
-  return ok({});
-}
-
 // ----- goal actions -----
 export async function upsertGoal(goal: Partial<Goal> & { sheet_id: string }) {
   const { supabase } = await requireUser();

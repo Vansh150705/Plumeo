@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { computeScore, formatTarget, uomLabel } from '@/lib/goals';
+import { computeScore, formatTarget } from '@/lib/goals';
 
 export async function GET() {
   const supabase = createClient();

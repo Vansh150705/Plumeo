@@ -20,10 +20,6 @@ export interface ChatMessage {
   content: string;
 }
 
-export function isGroqConfigured(): boolean {
-  return !!process.env.GROQ_API_KEY;
-}
-
 export async function groqChat(
   messages: ChatMessage[],
   opts: { json?: boolean; temperature?: number; maxTokens?: number } = {},
