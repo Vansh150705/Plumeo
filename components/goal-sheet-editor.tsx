@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input, Textarea, Label } from '@/components/ui/input';
 import { StatusPill, Pill } from '@/components/ui/pill';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Trash2, Lock, Save, AlertCircle, CheckCircle2, Send, Pencil, Info } from 'lucide-react';
+import { Plus, Trash2, Lock, Save, AlertCircle, CheckCircle2, Send, Pencil, Info, Sparkles } from 'lucide-react';
 import { upsertGoal, deleteGoal, submitSheet } from '@/lib/actions';
 import { validateSheet, totalWeightage, MAX_GOALS_PER_SHEET, REQUIRED_TOTAL_WEIGHTAGE, MIN_WEIGHTAGE, formatTarget, uomLabel } from '@/lib/goals';
 import type { Goal, GoalSheet, Cycle } from '@/lib/types';
@@ -296,6 +296,41 @@ function GoalRow({
   const isSharedClone = !!goal?.shared_origin_id;
   const cantEditCore = locked || isSharedClone;
 
+  // AI refinement (Groq, free tier) — sharpens the draft title + description.
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  async function refineWithAI() {
+    setAiBusy(true);
+    setAiError(null);
+    try {
+      const res = await fetch('/api/ai/goal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          thrust_area: form.thrust_area,
+          title: form.title,
+          description: form.description,
+          uom: form.uom,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAiError(data?.error ?? 'AI request failed.');
+        return;
+      }
+      setForm(f => ({
+        ...f,
+        title: data.title || f.title,
+        description: data.description || f.description,
+      }));
+    } catch {
+      setAiError('Network error. Please try again.');
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
   if (!editing && goal) {
     return (
       <Card className={cn('hover:border-primary/30 transition group', isSharedClone && 'border-purple-500/30')}>
@@ -388,7 +423,21 @@ function GoalRow({
         </div>
 
         <div className="mb-3">
-          <Label>Description</Label>
+          <div className="flex items-center justify-between">
+            <Label>Description</Label>
+            {!cantEditCore && (
+              <button
+                type="button"
+                onClick={refineWithAI}
+                disabled={aiBusy}
+                className="mb-1.5 inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground transition hover:border-primary/40 hover:text-foreground disabled:opacity-50"
+                title="Sharpen this goal into a SMART, measurable version"
+              >
+                <Sparkles className={cn('size-3', aiBusy && 'animate-pulse')} />
+                {aiBusy ? 'Refining…' : 'Refine with AI'}
+              </button>
+            )}
+          </div>
           <Textarea
             value={form.description ?? ''}
             onChange={e => setForm({ ...form, description: e.target.value })}
@@ -396,6 +445,12 @@ function GoalRow({
             disabled={cantEditCore}
             rows={2}
           />
+          {aiError && (
+            <div className="mt-1.5 flex items-start gap-1.5 text-[11px] text-orange-400">
+              <AlertCircle className="size-3 mt-0.5 shrink-0" />
+              <span>{aiError}</span>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
