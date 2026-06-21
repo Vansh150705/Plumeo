@@ -7,10 +7,10 @@ export const runtime = 'nodejs';
 
 const GoalInput = z.object({
   title: z.string().max(300),
-  thrust_area: z.string().max(120).optional().default(''),
-  weightage: z.number().optional().default(0),
-  target: z.string().max(200).optional().default(''),
-  status: z.string().max(40).optional().default(''),
+  thrust_area: z.string().max(120).nullish().transform(v => v ?? ''),
+  weightage: z.number().nullish().transform(v => v ?? 0),
+  target: z.string().max(200).nullish().transform(v => v ?? ''),
+  status: z.string().max(40).nullish().transform(v => v ?? ''),
   score: z.number().nullable().optional().default(null),
   employee_comment: z.string().max(1000).nullable().optional().default(null),
 });

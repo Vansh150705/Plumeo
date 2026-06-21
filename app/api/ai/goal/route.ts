@@ -5,11 +5,13 @@ import { groqChat, GroqNotConfigured } from '@/lib/groq';
 
 export const runtime = 'nodejs';
 
+// Existing goals can carry null for description/target fields, so accept
+// null/undefined everywhere and normalize to a string before validating length.
 const Body = z.object({
-  thrust_area: z.string().max(120).optional().default(''),
-  title: z.string().max(300).optional().default(''),
-  description: z.string().max(2000).optional().default(''),
-  uom: z.string().max(40).optional().default('Numeric'),
+  thrust_area: z.string().max(120).nullish().transform(v => v ?? ''),
+  title: z.string().max(300).nullish().transform(v => v ?? ''),
+  description: z.string().max(2000).nullish().transform(v => v ?? ''),
+  uom: z.string().max(40).nullish().transform(v => v ?? 'Numeric'),
 });
 
 const SYSTEM = `You are an OKR / performance-goal coach. Rewrite an employee's draft goal so it is specific, measurable, outcome-oriented and time-bound (SMART). Keep it realistic, professional and concise.
