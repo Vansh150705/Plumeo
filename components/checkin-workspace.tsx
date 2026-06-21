@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea, Label } from '@/components/ui/input';
 import { Pill, ProgressPill, StatusPill } from '@/components/ui/pill';
-import { Save, Lock, MessageSquare, CheckCircle2, AlertTriangle, Calendar } from 'lucide-react';
+import { Save, Lock, MessageSquare, CheckCircle2, AlertTriangle, Calendar, Sparkles, AlertCircle } from 'lucide-react';
 import { upsertCheckIn, managerCheckIn } from '@/lib/actions';
 import { computeScore, formatTarget, uomLabel } from '@/lib/goals';
 import type { Goal, CheckIn, CheckInQuarter, Cycle, GoalProgress, SheetStatus, UserRole } from '@/lib/types';
@@ -32,6 +32,11 @@ export function CheckInWorkspace({
 }) {
   const [quarter, setQuarter] = useState<CheckInQuarter>(currentQuarter);
   const [checkIns, setCheckIns] = useState<CheckIn[]>(initialCheckIns);
+
+  // AI narrative summary of the selected quarter (Groq, free tier).
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summaryBusy, setSummaryBusy] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   const sheetUnlocked = sheetStatus !== 'Approved' && sheetStatus !== 'Locked';
 
@@ -62,6 +67,48 @@ export function CheckInWorkspace({
     if (weightedTotal === 0) return { score: null, coverage: 0, scoredCount: 0 };
     return { score: weightedSum / weightedTotal, coverage: weightedTotal, scoredCount: scored };
   })();
+
+  async function generateSummary() {
+    setSummaryBusy(true);
+    setSummaryError(null);
+    setSummary(null);
+    try {
+      const payloadGoals = goals.map(g => {
+        const ci = getCheckIn(g.id, quarter);
+        const s = ci ? computeScore(g, ci) : null;
+        return {
+          title: g.title,
+          thrust_area: g.thrust_area,
+          weightage: g.weightage,
+          target: formatTarget(g),
+          status: ci?.progress_status ?? 'NotStarted',
+          score: s == null ? null : Math.round(s),
+          employee_comment: ci?.employee_comment ?? null,
+        };
+      });
+      const res = await fetch('/api/ai/summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quarter,
+          cycleName: cycle.name,
+          employeeName,
+          weightedScore: sheetScore.score,
+          goals: payloadGoals,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSummaryError(data?.error ?? 'AI request failed.');
+        return;
+      }
+      setSummary(data.summary ?? '');
+    } catch {
+      setSummaryError('Network error. Please try again.');
+    } finally {
+      setSummaryBusy(false);
+    }
+  }
 
   // Helper: lookup cycle quarter dates for header banner
   const quarterDates: Record<CheckInQuarter, { open: string; close: string }> = {
@@ -108,7 +155,7 @@ export function CheckInWorkspace({
               return (
                 <button
                   key={q}
-                  onClick={() => setQuarter(q)}
+                  onClick={() => { setQuarter(q); setSummary(null); setSummaryError(null); }}
                   className={cn(
                     'relative px-4 py-3 rounded-lg text-sm font-medium transition-all',
                     active
@@ -149,6 +196,37 @@ export function CheckInWorkspace({
           highlight={sheetScore.score != null && sheetScore.score >= 90}
         />
       </div>
+
+      {/* AI quarter summary */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="size-4 text-primary" />
+              <div>
+                <div className="text-sm font-medium">AI progress summary</div>
+                <div className="text-xs text-muted-foreground">A plain-language read of {quarter} across all goals.</div>
+              </div>
+            </div>
+            <Button size="sm" variant="secondary" onClick={generateSummary} disabled={summaryBusy || goals.length === 0}>
+              <Sparkles className={cn('size-3.5', summaryBusy && 'animate-pulse')} />
+              {summaryBusy ? 'Summarizing…' : summary ? 'Regenerate' : 'Summarize quarter'}
+            </Button>
+          </div>
+
+          {summaryError && (
+            <div className="mt-3 flex items-start gap-2 text-xs text-orange-400">
+              <AlertCircle className="size-3.5 mt-0.5 shrink-0" />
+              <span>{summaryError}</span>
+            </div>
+          )}
+          {summary && (
+            <div className="mt-3 rounded-lg border border-border bg-background/50 p-3 text-sm leading-relaxed text-muted-foreground animate-fade-in">
+              {summary}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Goal rows */}
       <div className="space-y-3">
