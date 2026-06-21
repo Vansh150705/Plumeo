@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Bell, Search, Menu } from 'lucide-react';
 import { Pill } from '@/components/ui/pill';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { fmtRelative } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import type { AppUser, Notification } from '@/lib/types';
@@ -52,6 +53,8 @@ export function TopBar({ user, notifications: initialNotifications, onMenu, onSe
           <span>Search…</span>
           <span className="ml-auto font-mono text-[10px] px-1.5 py-0.5 rounded border border-border">⌘K</span>
         </button>
+
+        <ThemeToggle />
 
         <div className="relative">
           <button
