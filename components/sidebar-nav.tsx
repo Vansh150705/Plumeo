@@ -4,10 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui/avatar';
-import {
-  LayoutDashboard, Target, ClipboardCheck, Bell, Users, Settings,
-  BarChart3, GitBranch, Building2, ScrollText, FileSpreadsheet, LogOut, Feather,
-} from 'lucide-react';
+import { LogOut, Feather } from 'lucide-react';
+import { navFor } from '@/lib/nav';
 import type { AppUser } from '@/lib/types';
 import { signOut } from '@/lib/auth';
 
@@ -105,66 +103,4 @@ function NavBody({ user, onNavigate }: { user: AppUser; onNavigate?: () => void 
       </div>
     </>
   );
-}
-
-function navFor(role: AppUser['role']) {
-  if (role === 'Employee') {
-    return [
-      {
-        label: 'Workspace',
-        items: [
-          { href: '/employee',            label: 'My goals',       icon: Target },
-          { href: '/employee/checkins',   label: 'Check-ins',      icon: ClipboardCheck },
-          { href: '/employee/notifications', label: 'Inbox',       icon: Bell },
-        ],
-      },
-    ];
-  }
-  if (role === 'Manager') {
-    return [
-      {
-        label: 'Team',
-        items: [
-          { href: '/manager',                 label: 'Dashboard',    icon: LayoutDashboard },
-          { href: '/manager/approvals',       label: 'Approvals',    icon: ClipboardCheck },
-          { href: '/manager/checkins',        label: 'Check-ins',    icon: Target },
-          { href: '/manager/shared',          label: 'Shared goals', icon: Users },
-        ],
-      },
-      {
-        label: 'Workspace',
-        items: [
-          { href: '/manager/me',              label: 'My goals',      icon: FileSpreadsheet },
-          { href: '/manager/notifications',   label: 'Inbox',         icon: Bell },
-        ],
-      },
-    ];
-  }
-  // Admin
-  return [
-    {
-      label: 'Operations',
-      items: [
-        { href: '/admin',               label: 'Overview',        icon: LayoutDashboard },
-        { href: '/admin/cycles',        label: 'Cycles',          icon: Building2 },
-        { href: '/admin/users',         label: 'Users & Entra',   icon: Users },
-        { href: '/admin/escalations',   label: 'Escalations',     icon: GitBranch },
-      ],
-    },
-    {
-      label: 'Insights',
-      items: [
-        { href: '/admin/analytics',     label: 'Analytics',       icon: BarChart3 },
-        { href: '/admin/audit',         label: 'Audit log',       icon: ScrollText },
-        { href: '/admin/reports',       label: 'Reports',         icon: FileSpreadsheet },
-      ],
-    },
-    {
-      label: 'Workspace',
-      items: [
-        { href: '/admin/notifications', label: 'Inbox',           icon: Bell },
-        { href: '/admin/settings',      label: 'Settings',        icon: Settings },
-      ],
-    },
-  ];
 }

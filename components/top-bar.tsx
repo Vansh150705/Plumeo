@@ -9,7 +9,7 @@ import { fmtRelative } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import type { AppUser, Notification } from '@/lib/types';
 
-export function TopBar({ user, notifications: initialNotifications, onMenu }: { user: AppUser; notifications: Notification[]; onMenu?: () => void }) {
+export function TopBar({ user, notifications: initialNotifications, onMenu, onSearch }: { user: AppUser; notifications: Notification[]; onMenu?: () => void; onSearch?: () => void }) {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState(initialNotifications);
   const router = useRouter();
@@ -43,11 +43,15 @@ export function TopBar({ user, notifications: initialNotifications, onMenu }: { 
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-card text-xs text-muted-foreground w-64">
+        <button
+          onClick={onSearch}
+          className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-card text-xs text-muted-foreground w-64 transition hover:border-primary/40 hover:text-foreground"
+          aria-label="Search"
+        >
           <Search className="size-3.5" />
           <span>Search…</span>
           <span className="ml-auto font-mono text-[10px] px-1.5 py-0.5 rounded border border-border">⌘K</span>
-        </div>
+        </button>
 
         <div className="relative">
           <button
