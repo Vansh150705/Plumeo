@@ -48,7 +48,14 @@ in instantly, the same way it would after a real Entra OAuth callback.
 - Live weighted sheet score, recomputed on every check-in
 - 360° / peer feedback: peers and skip-level managers leave structured rating + comment feedback, shared with the person or kept private to their management chain (enforced by RLS)
 
+**AI assist (optional, free)**
+- "Refine with AI" rewrites a draft goal into a sharper, measurable SMART version
+- "Summarize quarter" turns a sheet's check-ins into a plain-language progress narrative
+- Powered by [Groq](https://console.groq.com/keys)'s free tier — set `GROQ_API_KEY` to enable; the features hide their errors gracefully and the app runs fully without it
+
 **Across the board**
+- ⌘K command palette to search and jump to any page for your role
+- Light / dark theme toggle, remembered per browser
 - Role-based access enforced with Row Level Security at the database layer
 - Immutable audit log: every change after lock recorded with before/after snapshots
 - CSV export for the achievement report and the audit log
@@ -69,6 +76,7 @@ in instantly, the same way it would after a real Entra OAuth callback.
 | Database | Supabase Postgres + Row Level Security | RLS *is* the authorisation layer |
 | Identity | Supabase Auth + mock Entra ID | Swaps to real Microsoft Graph with one HTTP call |
 | Notifications | Postgres-backed in-app inbox | Per-user notifications on every lifecycle event |
+| AI (optional) | Groq free tier (Llama 3.3) | Goal refinement + quarter summaries at $0 |
 | Cron | Vercel Cron → escalations | Nightly escalation sweep (batched queries, no N+1) |
 | Tests/CI | Vitest + GitHub Actions | Typecheck, unit tests, and build gated on every push |
 | Hosting | Vercel + Supabase, both free tier | $0/month at demo volumes |
