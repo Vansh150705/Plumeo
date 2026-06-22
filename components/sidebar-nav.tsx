@@ -4,10 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui/avatar';
-import { LogOut, Feather } from 'lucide-react';
+import { Feather } from 'lucide-react';
 import { navFor } from '@/lib/nav';
 import type { AppUser } from '@/lib/types';
-import { signOut } from '@/lib/auth';
 
 export function SidebarNav({ user, mobileOpen = false, onClose }: {
   user: AppUser;
@@ -94,11 +93,6 @@ function NavBody({ user, onNavigate }: { user: AppUser; onNavigate?: () => void 
             <div className="truncate text-xs font-medium">{user.full_name}</div>
             <div className="truncate text-[10px] text-muted-foreground">{user.upn}</div>
           </div>
-          <form action={signOut}>
-            <button type="submit" className="rounded p-1.5 text-muted-foreground transition hover:bg-accent hover:text-foreground" title="Sign out">
-              <LogOut className="size-3.5" />
-            </button>
-          </form>
         </div>
       </div>
     </>

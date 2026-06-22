@@ -3,15 +3,18 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Bell, Search, Menu } from 'lucide-react';
+import { Bell, Search, Menu, LogOut } from 'lucide-react';
 import { Pill } from '@/components/ui/pill';
+import { Avatar } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { fmtRelative } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
+import { signOut } from '@/lib/auth';
 import type { AppUser, Notification } from '@/lib/types';
 
 export function TopBar({ user, notifications: initialNotifications, onMenu, onSearch }: { user: AppUser; notifications: Notification[]; onMenu?: () => void; onSearch?: () => void }) {
   const [open, setOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState(initialNotifications);
   const router = useRouter();
 
@@ -108,6 +111,44 @@ export function TopBar({ user, notifications: initialNotifications, onMenu, onSe
                     ))
                   )}
                 </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="relative">
+          <button
+            onClick={() => setUserMenuOpen(v => !v)}
+            className="rounded-full transition hover:opacity-80"
+            aria-label="Account menu"
+          >
+            <Avatar name={user.full_name} id={user.id} size={32} />
+          </button>
+
+          {userMenuOpen && (
+            <>
+              <button
+                className="fixed inset-0 z-40"
+                aria-label="Close"
+                onClick={() => setUserMenuOpen(false)}
+              />
+              <div className="absolute right-0 top-full mt-1.5 w-60 rounded-xl border border-border bg-card shadow-2xl z-50 overflow-hidden animate-fade-in">
+                <div className="flex items-center gap-2.5 px-4 py-3 border-b border-border">
+                  <Avatar name={user.full_name} id={user.id} size={36} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium">{user.full_name}</div>
+                    <div className="truncate text-[11px] text-muted-foreground">{user.upn}</div>
+                  </div>
+                </div>
+                <form action={signOut}>
+                  <button
+                    type="submit"
+                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground"
+                  >
+                    <LogOut className="size-4" />
+                    <span>Sign out</span>
+                  </button>
+                </form>
               </div>
             </>
           )}
