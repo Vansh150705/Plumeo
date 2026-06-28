@@ -46,22 +46,6 @@ function Reveal({ children, delay = 0, y = 20, className }: {
   );
 }
 
-function Magnetic({ children, className }: { children: ReactNode; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const x = useSpring(0, { stiffness: 200, damping: 18 });
-  const y = useSpring(0, { stiffness: 200, damping: 18 });
-  function move(e: React.MouseEvent) {
-    const el = ref.current; if (!el) return;
-    const r = el.getBoundingClientRect();
-    x.set((e.clientX - (r.left + r.width / 2)) * 0.3);
-    y.set((e.clientY - (r.top + r.height / 2)) * 0.3);
-  }
-  return (
-    <motion.div ref={ref} onMouseMove={move} onMouseLeave={() => { x.set(0); y.set(0); }}
-      style={{ x, y }} className={className}>{children}</motion.div>
-  );
-}
-
 function CountUp({ to, suffix = '', prefix = '', dur = 1200 }: { to: number; suffix?: string; prefix?: string; dur?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: '-20% 0px' });
@@ -87,12 +71,10 @@ function CountUp({ to, suffix = '', prefix = '', dur = 1200 }: { to: number; suf
 
 function PrimaryButton({ children, onClick, className = '' }: { children: ReactNode; onClick?: () => void; className?: string }) {
   return (
-    <Magnetic>
-      <button onClick={onClick}
-        className={`group inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-[14.5px] font-medium text-primary-foreground pl-shadow-sm transition-[background,transform] hover:bg-[hsl(218_52%_22%)] ${className}`}>
-        {children}
-      </button>
-    </Magnetic>
+    <button onClick={onClick}
+      className={`group inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-[14.5px] font-medium text-primary-foreground pl-shadow-sm transition-colors hover:bg-[hsl(218_52%_22%)] ${className}`}>
+      {children}
+    </button>
   );
 }
 
@@ -102,7 +84,7 @@ function PrimaryButton({ children, onClick, className = '' }: { children: ReactN
 function GitHubButton({ className = '' }: { className?: string }) {
   return (
     <a href={GH} target="_blank" rel="noreferrer"
-      className={`group inline-flex h-12 items-center gap-2.5 rounded-xl border border-border bg-white pl-4 pr-5 text-[14.5px] font-medium text-foreground transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-foreground/25 hover:pl-shadow-lg ${className}`}>
+      className={`group inline-flex h-12 items-center gap-2.5 rounded-xl border border-border bg-white pl-4 pr-5 text-[14.5px] font-medium text-foreground transition-colors hover:border-foreground/25 hover:bg-secondary ${className}`}>
       <span className="grid size-7 place-items-center rounded-lg" style={{ background: C.navy }}>
         <Github className="size-[15px]" style={{ color: C.cream }} />
       </span>
