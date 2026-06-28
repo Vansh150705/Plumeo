@@ -2,13 +2,12 @@
 
 import { useState, useTransition, useEffect, useRef, type ReactNode } from 'react';
 import {
-  motion, useSpring, useInView, useScroll, useTransform, AnimatePresence,
-  type MotionValue,
+  motion, useSpring, useInView, useScroll, AnimatePresence,
 } from 'framer-motion';
 import { getMockDirectory, ssoSignIn } from '@/lib/auth';
 import { Avatar } from '@/components/ui/avatar';
 import {
-  Feather, ArrowRight, Check, X, Github, Plus, Quote,
+  Feather, ArrowRight, Check, X, Github, Plus, Quote, Star, Search, KeyRound,
   FileCheck, ShieldCheck, Users, BarChart3, Bell, GitBranch, Lock, Target,
 } from 'lucide-react';
 
@@ -97,9 +96,22 @@ function PrimaryButton({ children, onClick, className = '' }: { children: ReactN
   );
 }
 
-function GhostButton({ children, href, onClick }: { children: ReactNode; href?: string; onClick?: () => void }) {
-  const cls = 'inline-flex h-12 items-center gap-2 rounded-xl border border-border bg-white px-6 text-[14.5px] font-medium text-foreground transition-colors hover:border-foreground/25 hover:bg-secondary';
-  return href ? <a href={href} className={cls}>{children}</a> : <button onClick={onClick} className={cls}>{children}</button>;
+// Large, prominent source-code button for the hero — sits alongside the primary
+// CTA (parity with the other projects). A subtle navy bar + star count make it
+// read as a real "view the build" affordance rather than a quiet text link.
+function GitHubButton({ className = '' }: { className?: string }) {
+  return (
+    <a href={GH} target="_blank" rel="noreferrer"
+      className={`group inline-flex h-12 items-center gap-2.5 rounded-xl border border-border bg-white pl-4 pr-5 text-[14.5px] font-medium text-foreground transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-foreground/25 hover:pl-shadow-lg ${className}`}>
+      <span className="grid size-7 place-items-center rounded-lg" style={{ background: C.navy }}>
+        <Github className="size-[15px]" style={{ color: C.cream }} />
+      </span>
+      View on GitHub
+      <span className="ml-0.5 hidden items-center gap-1 border-l border-border pl-2.5 text-[12.5px] text-muted-foreground sm:inline-flex">
+        <Star className="size-3.5" style={{ color: C.gold }} /> Source
+      </span>
+    </a>
+  );
 }
 
 /* ===================================================================== */
@@ -192,50 +204,221 @@ export function LandingClient() {
 /*  Hero                                                                 */
 /* ===================================================================== */
 
+// Product-led hero. Instead of a big centred statement, a compact lead-in hands
+// straight off to the real thing: a full Plumeo workspace — sidebar, top bar,
+// the weighted goal sheet, scoring and live team activity — as the focal point.
 function Hero({ onStart }: { onStart: () => void }) {
-  const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } } };
-  const item = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } } };
+  const up = (delay: number) => ({
+    initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.7, ease: EASE, delay },
+  });
   return (
-    <section id="top" className="relative">
-      <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-16 md:px-8 md:pt-24 lg:grid-cols-[1.02fr_0.98fr]">
-        <motion.div variants={stagger} initial="hidden" animate="show">
-          <motion.div variants={item} className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-white px-3 py-1.5 text-[12px] font-medium pl-shadow-sm">
-            <span className="size-1.5 rounded-full" style={{ background: C.gold }} />
-            <span className="uppercase tracking-[0.14em] text-muted-foreground">Goal setting, made human</span>
-          </motion.div>
+    <section id="top" className="relative overflow-hidden">
+      {/* clean white stage with one warm glow pooled beneath the product — no grid */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute left-1/2 top-[30%] h-[680px] w-[1280px] -translate-x-1/2 rounded-[50%] opacity-70"
+          style={{ background: 'radial-gradient(closest-side, hsl(var(--cream)) 0%, transparent 100%)' }} />
+      </div>
 
-          <motion.h1 variants={item} className="font-display text-[clamp(2.6rem,5.2vw,4.4rem)] font-medium leading-[1.04]">
-            Set goals your team
-            <br />
-            <span className="relative inline-block">
-              actually loves.
-              <GoldUnderline />
-            </span>
-          </motion.h1>
-
-          <motion.p variants={item} className="mt-7 max-w-md text-[16.5px] leading-relaxed text-muted-foreground">
-            Plumeo runs the whole goal lifecycle: drafting, manager approval,
-            quarterly check-ins, and an audit trail that never forgets, all in
-            one calm, beautifully simple place.
-          </motion.p>
-
-          <motion.div variants={item} className="mt-9 flex flex-wrap items-center gap-3">
-            <PrimaryButton onClick={onStart}>Start for free <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" /></PrimaryButton>
-            <GhostButton href="#how">See how it works</GhostButton>
-          </motion.div>
-
-          <motion.div variants={item} className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-muted-foreground">
-            {['Role-based access', 'Immutable audit log', 'Free to run'].map((t) => (
-              <span key={t} className="inline-flex items-center gap-1.5"><Check className="size-3.5" style={{ color: C.gold }} /> {t}</span>
+      {/* compact lead-in */}
+      <div className="mx-auto max-w-3xl px-5 pt-14 text-center md:px-8 md:pt-16">
+        <motion.div {...up(0)} className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-border bg-white py-1.5 pl-2 pr-3.5 text-[12px] font-medium pl-shadow-sm">
+          <span className="flex -space-x-1.5">
+            {(['employee', 'manager', 'admin'] as const).map((v) => (
+              <span key={v} className="size-[18px] overflow-hidden rounded-full border border-white bg-white"><Persona variant={v} /></span>
             ))}
-          </motion.div>
+          </span>
+          <span className="uppercase tracking-[0.14em] text-muted-foreground">Goal management for whole teams</span>
         </motion.div>
 
-        <HeroScene />
+        <motion.h1 {...up(0.08)} className="mx-auto max-w-2xl font-display text-[clamp(2.35rem,4.3vw,3.45rem)] font-medium leading-[1.07]">
+          Set goals your team{' '}
+          <span className="relative inline-block">actually loves<GoldUnderline /></span>.
+        </motion.h1>
+
+        <motion.p {...up(0.16)} className="mx-auto mt-6 max-w-xl text-[17px] leading-relaxed text-muted-foreground">
+          The whole goal lifecycle — draft, approve, weighted scoring, and an audit
+          trail that never forgets — in one calm, shared workspace.
+        </motion.p>
+
+        <motion.div {...up(0.24)} className="mt-9 flex flex-wrap items-center justify-center gap-3">
+          <PrimaryButton onClick={onStart}>Start for free <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" /></PrimaryButton>
+          <GitHubButton />
+        </motion.div>
       </div>
+
+      {/* the workspace — the focal point */}
+      <ProductShowcase />
     </section>
   );
 }
+
+// The focal point: a full Plumeo workspace, not just a panel — sidebar nav, a top
+// bar with search and collaborators, the weighted goal sheet with the 100%-balanced
+// rule, and a live summary rail. Floating cards show the collaboration around it.
+const WORKNAV = [
+  { icon: FileCheck, label: 'My goal sheet', active: true },
+  { icon: ShieldCheck, label: 'Approvals', badge: '2' },
+  { icon: Users, label: 'Team goals' },
+  { icon: BarChart3, label: 'Analytics' },
+  { icon: Lock, label: 'Audit log' },
+];
+
+function ProductShowcase() {
+  return (
+    <div className="relative mx-auto mt-12 max-w-6xl px-5 md:mt-14 md:px-8">
+      <div className="relative mx-auto w-full max-w-[1120px]">
+        {/* soft elevation glow under the window */}
+        <div aria-hidden className="absolute inset-x-10 -bottom-10 top-16 -z-10 rounded-[3rem] opacity-70 blur-3xl"
+          style={{ background: 'radial-gradient(55% 60% at 50% 40%, hsl(var(--gold) / 0.16), transparent)' }} />
+
+        <motion.div
+          initial={{ opacity: 0, y: 48, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.9, ease: EASE, delay: 0.3 }}
+          className="relative overflow-hidden rounded-2xl border border-border bg-white pl-shadow-lg">
+          {/* top bar: brand + breadcrumb · search · collaborators */}
+          <div className="flex items-center gap-3 border-b border-border px-3.5 py-2.5 sm:px-4">
+            <div className="flex items-center gap-2.5">
+              <Brandmark />
+              <span className="hidden text-[12.5px] text-muted-foreground sm:inline">
+                <span className="font-semibold" style={{ color: C.ink }}>Maya Chen</span> <span className="opacity-50">/</span> Goal Sheet
+              </span>
+            </div>
+            <div className="mx-auto hidden w-full max-w-[260px] items-center gap-2 rounded-lg border border-border bg-secondary/60 px-3 py-1.5 text-[12px] text-muted-foreground md:flex">
+              <Search className="size-3.5" /> Search goals, people…
+            </div>
+            <div className="ml-auto flex items-center gap-2.5">
+              <span className="hidden items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold sm:inline-flex" style={{ background: C.cream, color: C.gold }}>
+                <span className="size-1.5 rounded-full" style={{ background: C.gold }} /> Awaiting approval
+              </span>
+              <span className="hidden -space-x-2 sm:flex">
+                {(['admin', 'manager', 'employee'] as const).map((v) => (
+                  <span key={v} className="size-6 overflow-hidden rounded-full border-2 border-white bg-white"><Persona variant={v} /></span>
+                ))}
+              </span>
+              <span className="grid size-7 place-items-center rounded-lg border border-border text-muted-foreground"><Bell className="size-3.5" /></span>
+            </div>
+          </div>
+
+          {/* body: sidebar · sheet · summary rail */}
+          <div className="flex">
+            {/* sidebar */}
+            <aside className="hidden w-[208px] shrink-0 flex-col justify-between border-r border-border bg-secondary/30 p-3 lg:flex">
+              <div className="space-y-0.5">
+                <div className="px-2 pb-2 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Workspace</div>
+                {WORKNAV.map((n) => (
+                  <div key={n.label}
+                    className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium"
+                    style={n.active ? { background: C.cream, color: C.ink } : { color: 'hsl(var(--muted-foreground))' }}>
+                    <n.icon className="size-4" style={{ color: n.active ? C.gold : 'hsl(var(--muted-foreground))' }} />
+                    <span className="flex-1">{n.label}</span>
+                    {n.badge && <span className="grid size-4 place-items-center rounded-full text-[10px] font-bold text-white" style={{ background: C.gold }}>{n.badge}</span>}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 flex items-center gap-2.5 rounded-xl border border-border bg-white p-2.5">
+                <span className="size-8 shrink-0 overflow-hidden rounded-full border border-border"><Persona variant="employee" /></span>
+                <div className="leading-tight">
+                  <div className="text-[12px] font-semibold" style={{ color: C.ink }}>Maya Chen</div>
+                  <div className="text-[10.5px] text-muted-foreground">Employee</div>
+                </div>
+              </div>
+            </aside>
+
+            {/* the sheet */}
+            <div className="min-w-0 flex-1 p-4 sm:p-5">
+              <div className="mb-4 flex items-end justify-between gap-3">
+                <div>
+                  <h3 className="font-display text-[20px] font-medium leading-tight" style={{ color: C.ink }}>Goal Sheet</h3>
+                  <div className="text-[12px] text-muted-foreground">FY 2026 · Q2 · 4 of 8 goals</div>
+                </div>
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[12px] font-medium" style={{ color: C.ink }}>
+                  <Plus className="size-3.5" style={{ color: C.gold }} /> Add goal
+                </span>
+              </div>
+              <div className="mb-2 grid grid-cols-[1fr_3.5rem_5rem] items-center gap-3 px-2 text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">
+                <span>Goal</span><span className="text-center">Weight</span><span className="text-right">Q2</span>
+              </div>
+              <div className="space-y-1.5">
+                {GOALS.map((g, i) => <GoalRow key={g.name} g={g} i={i} />)}
+              </div>
+              {/* the signature mechanic: weightage must total 100% */}
+              <div className="mt-4 rounded-xl border border-border bg-secondary/50 p-3.5">
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="font-medium" style={{ color: C.ink }}>Total weightage</span>
+                  <span className="inline-flex items-center gap-1.5 font-semibold" style={{ color: C.gold }}>
+                    <Check className="size-3.5" /> 100% · balanced
+                  </span>
+                </div>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full" style={{ background: C.line }}>
+                  <motion.div className="h-full rounded-full" style={{ background: C.gold }}
+                    initial={{ width: 0 }} animate={{ width: '100%' }} transition={{ duration: 1.2, ease: EASE, delay: 0.9 }} />
+                </div>
+              </div>
+            </div>
+
+            {/* summary rail */}
+            <aside className="hidden w-[248px] shrink-0 border-l border-border bg-secondary/20 p-4 xl:block">
+              <div className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">Weighted score</div>
+              <div className="mt-1 flex items-end gap-2">
+                <span className="font-display text-[42px] font-medium leading-none" style={{ color: C.ink }}>86</span>
+                <span className="mb-1 inline-flex items-center gap-1 text-[12px] font-semibold" style={{ color: C.gold }}><ArrowRight className="size-3 -rotate-45" /> +6 QoQ</span>
+              </div>
+              <div className="mt-4 flex items-end gap-1.5" style={{ height: 56 }}>
+                {[58, 66, 74, 86].map((v, i) => (
+                  <motion.div key={i} className="flex-1 rounded-t" style={{ background: i === 3 ? C.gold : C.navy, opacity: i === 3 ? 1 : 0.2 + i * 0.12 }}
+                    initial={{ height: 0 }} whileInView={{ height: `${v}%` }} viewport={{ once: true }} transition={{ duration: 0.7, ease: EASE, delay: 0.7 + i * 0.08 }} />
+                ))}
+              </div>
+              <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground"><span>Q1</span><span>Q2</span><span>Q3</span><span>Q4</span></div>
+
+              <div className="mt-5 space-y-2.5 border-t border-border pt-4">
+                <div className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">Activity</div>
+                {ACTIVITY.map((a, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <span className="size-5 shrink-0 overflow-hidden rounded-full border border-white bg-white"><Persona variant={a.who} /></span>
+                    <span className="text-[11.5px] leading-tight text-muted-foreground">{a.t}</span>
+                  </div>
+                ))}
+              </div>
+            </aside>
+          </div>
+        </motion.div>
+
+      </div>
+    </div>
+  );
+}
+
+function GoalRow({ g, i }: { g: typeof GOALS[number]; i: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE, delay: 0.5 + i * 0.08 }}
+      className="grid grid-cols-[1fr_3.5rem_5rem] items-center gap-3 rounded-lg border border-transparent px-2 py-2 transition-colors hover:border-border hover:bg-secondary/40">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <span className="grid size-7 shrink-0 place-items-center rounded-md" style={{ background: C.cream }}><Target className="size-3.5" style={{ color: C.navy }} /></span>
+        <span className="truncate text-[13px] font-medium" style={{ color: C.ink }}>{g.name}</span>
+      </div>
+      <span className="text-center text-[12px] font-semibold tabular-nums" style={{ color: C.navy }}>{g.weight}</span>
+      <div className="flex items-center justify-end gap-1.5">
+        <span className="text-[12px] tabular-nums text-muted-foreground">{g.q2}</span>
+        <span className="size-1.5 rounded-full" style={{ background: g.on ? C.gold : 'hsl(28 72% 56%)' }} />
+      </div>
+    </motion.div>
+  );
+}
+
+const GOALS = [
+  { name: 'Payments redesign', weight: 25, q2: '92%', on: true },
+  { name: 'Zero P0 incidents', weight: 20, q2: '100%', on: true },
+  { name: 'Cut PR cycle time', weight: 20, q2: '78%', on: false },
+  { name: 'Onboarding revamp', weight: 35, q2: '64%', on: true },
+];
+
+const ACTIVITY: { who: 'employee' | 'manager' | 'admin'; t: string }[] = [
+  { who: 'manager', t: 'Aarav returned 1 goal for rework' },
+  { who: 'admin', t: 'HR locked Q1 achievements' },
+];
 
 function GoldUnderline() {
   return (
@@ -243,188 +426,6 @@ function GoldUnderline() {
       <motion.path d="M4 8 C 70 3, 230 3, 296 7" stroke={C.gold} strokeWidth="4" strokeLinecap="round"
         initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.9, delay: 0.9, ease: EASE }} />
     </svg>
-  );
-}
-
-// pointer-driven, depth-parallaxed hero illustration with a staggered entrance,
-// a slowly-rotating dashed gold orbit, and goal rows that check off in sequence.
-function HeroScene() {
-  const wrap = useRef<HTMLDivElement>(null);
-  const mx = useSpring(0, { stiffness: 90, damping: 18 });
-  const my = useSpring(0, { stiffness: 90, damping: 18 });
-  const [checked, setChecked] = useState(0);
-  const inView = useInView(wrap, { once: true, margin: '-15% 0px' });
-
-  useEffect(() => {
-    if (!inView) return;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) { setChecked(3); return; }
-    const timers = [0, 1, 2].map((i) => setTimeout(() => setChecked(i + 1), 900 + i * 320));
-    return () => timers.forEach(clearTimeout);
-  }, [inView]);
-
-  function move(e: React.MouseEvent) {
-    const el = wrap.current; if (!el) return;
-    const r = el.getBoundingClientRect();
-    mx.set((e.clientX - (r.left + r.width / 2)) / (r.width / 2));
-    my.set((e.clientY - (r.top + r.height / 2)) / (r.height / 2));
-  }
-  function leave() { mx.set(0); my.set(0); }
-
-  // depth layers: each element shifts by a different amount for a parallax feel
-  const cardX = useTransform(mx, [-1, 1], [-10, 10]);
-  const cardY = useTransform(my, [-1, 1], [-10, 10]);
-  const chip1X = useTransform(mx, [-1, 1], [-44, 44]);
-  const chip1Y = useTransform(my, [-1, 1], [-44, 44]);
-  const chip2X = useTransform(mx, [-1, 1], [-50, 50]);
-  const chip2Y = useTransform(my, [-1, 1], [-50, 50]);
-
-  return (
-    <div ref={wrap} onMouseMove={move} onMouseLeave={leave} className="relative mx-auto w-full max-w-[460px]">
-      {/* decorative contained backdrop: dot-grid + rotating dashed gold orbit */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="pl-dotgrid absolute inset-6 rounded-full opacity-50"
-          style={{ WebkitMaskImage: 'radial-gradient(circle, #000 35%, transparent 70%)', maskImage: 'radial-gradient(circle, #000 35%, transparent 70%)' }} />
-        <svg className="pl-spin-slow absolute left-1/2 top-1/2 size-[112%] -translate-x-1/2 -translate-y-1/2" viewBox="0 0 100 100" fill="none" aria-hidden>
-          <circle cx="50" cy="50" r="47" stroke={C.gold} strokeOpacity="0.35" strokeWidth="0.5" strokeDasharray="2 3" />
-        </svg>
-      </div>
-
-      {/* goal card (shallow depth) */}
-      <motion.div style={{ x: cardX, y: cardY }}
-        initial={{ opacity: 0, y: 24, scale: 0.96 }} whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: true }} transition={{ duration: 0.8, ease: EASE, delay: 0.15 }}>
-        <div className="relative rounded-[2.25rem] border border-border p-6 sm:p-8" style={{ background: C.cream }}>
-          <div className="mb-4 flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Team goals · FY 2026</span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: C.gold }}>
-              <span className="size-1.5 rounded-full" style={{ background: C.gold }} /> On track
-            </span>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-white p-5 pl-shadow-sm">
-            <div className="flex items-center gap-5">
-              <Ring value={100} />
-              <div className="flex-1 space-y-2.5">
-                {[
-                  { w: 25, label: 'Payments redesign' },
-                  { w: 20, label: 'Zero P0 incidents' },
-                  { w: 20, label: 'PR cycle time' },
-                ].map((r, i) => (
-                  <div key={r.label} className="flex items-center gap-2.5">
-                    <span className="grid size-6 shrink-0 place-items-center rounded-md text-[10px] font-semibold tabular-nums" style={{ background: C.cream, color: C.navy }}>{r.w}</span>
-                    <span className="flex-1 truncate text-[12px] font-medium" style={{ color: C.ink }}>{r.label}</span>
-                    <motion.span className="grid size-4 place-items-center rounded-full"
-                      animate={{ background: checked > i ? C.gold : 'rgba(0,0,0,0)', borderColor: checked > i ? C.gold : C.line }}
-                      transition={{ duration: 0.3 }} style={{ border: `1.5px solid ${C.line}` }}>
-                      <AnimatePresence>
-                        {checked > i && (
-                          <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.25, ease: EASE }}>
-                            <Check className="size-2.5 text-white" />
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
-                    </motion.span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-border bg-white px-3.5 py-2.5">
-              <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Goals</div>
-              <div className="font-display text-[18px] font-medium" style={{ color: C.ink }}>6 / 8</div>
-            </div>
-            <div className="rounded-xl border border-border bg-white px-3.5 py-2.5">
-              <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Q2 score</div>
-              <div className="font-display text-[18px] font-medium" style={{ color: C.gold }}>98</div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* teammates (mid depth). the top-left one is hidden on phones so it
-          doesn't clip the card header. */}
-      <FloatAvatar variant="employee" className="-left-5 -top-6 hidden size-[72px] sm:block" mx={mx} my={my} depth={26} delay={0.5} />
-      <FloatAvatar variant="manager" className="-right-4 top-16 size-[56px] sm:-right-6 sm:size-[60px]" mx={mx} my={my} depth={34} delay={0.65} />
-      <FloatAvatar variant="admin" className="-bottom-5 left-16 size-[54px] sm:left-20 sm:size-[58px]" mx={mx} my={my} depth={30} delay={0.8} />
-
-      {/* floating chips (deepest) */}
-      <motion.div style={{ x: chip1X, y: chip1Y }}
-        initial={{ opacity: 0, y: 16, scale: 0.9 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true }}
-        transition={{ duration: 0.6, ease: EASE, delay: 0.95 }}
-        className="absolute -right-3 -bottom-3 rounded-xl border border-border bg-white px-3 py-2.5 pl-shadow-lg">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">This quarter</span>
-        </div>
-        <div className="mt-0.5 flex items-end gap-2">
-          <span className="font-display text-[18px] font-medium" style={{ color: C.gold }}>+27%</span>
-          <MiniSparkline />
-        </div>
-      </motion.div>
-
-      <motion.div style={{ x: chip2X, y: chip2Y }}
-        initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
-        transition={{ duration: 0.6, ease: EASE, delay: 1.05 }}
-        className="pl-float absolute -left-4 bottom-24 hidden items-center gap-2 rounded-xl border border-border bg-white px-3 py-2 pl-shadow-lg sm:flex">
-        <span className="grid size-6 place-items-center rounded-full" style={{ background: C.gold }}><Check className="size-3.5 text-white" /></span>
-        <span className="text-[11.5px] font-semibold" style={{ color: C.ink }}>Sheet approved</span>
-      </motion.div>
-
-      <Sparkle className="absolute right-3 -top-2" size={14} />
-    </div>
-  );
-}
-
-function FloatAvatar({ variant, className, mx, my, depth, delay }: {
-  variant: 'employee' | 'manager' | 'admin'; className: string;
-  mx: MotionValue<number>; my: MotionValue<number>; depth: number; delay: number;
-}) {
-  const x = useTransform(mx, [-1, 1], [-depth, depth]);
-  const y = useTransform(my, [-1, 1], [-depth, depth]);
-  return (
-    <motion.div style={{ x, y }}
-      initial={{ opacity: 0, scale: 0.6 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
-      transition={{ type: 'spring', stiffness: 260, damping: 18, delay }}
-      className={`absolute overflow-hidden rounded-full border-[3px] border-white bg-white pl-shadow-sm ${className}`}>
-      <Persona variant={variant} />
-    </motion.div>
-  );
-}
-
-function MiniSparkline() {
-  return (
-    <svg width="56" height="20" viewBox="0 0 56 20" fill="none" aria-hidden>
-      <motion.path d="M2 16 L12 12 L22 14 L32 7 L42 9 L54 2" stroke={C.gold} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-        initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1, ease: EASE, delay: 1.1 }} />
-    </svg>
-  );
-}
-
-function Ring({ value }: { value: number }) {
-  const r = 26; const c = 2 * Math.PI * r;
-  return (
-    <div className="relative size-[72px] shrink-0">
-      <svg viewBox="0 0 64 64" className="size-[72px] -rotate-90">
-        <circle cx="32" cy="32" r={r} fill="none" stroke={C.line} strokeWidth="6" />
-        <motion.circle cx="32" cy="32" r={r} fill="none" stroke={C.gold} strokeWidth="6" strokeLinecap="round"
-          strokeDasharray={c} initial={{ strokeDashoffset: c }} whileInView={{ strokeDashoffset: c * (1 - value / 100) }}
-          viewport={{ once: true }} transition={{ duration: 1.2, ease: EASE, delay: 0.5 }} />
-      </svg>
-      <div className="absolute inset-0 grid place-items-center">
-        <span className="font-display text-[16px] font-medium" style={{ color: C.ink }}>{value}%</span>
-      </div>
-    </div>
-  );
-}
-
-function Sparkle({ className, size = 16 }: { className?: string; size?: number }) {
-  return (
-    <motion.svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden
-      animate={{ scale: [1, 1.25, 1], opacity: [0.7, 1, 0.7] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
-      <path d="M12 0 C 13 8, 16 11, 24 12 C 16 13, 13 16, 12 24 C 11 16, 8 13, 0 12 C 8 11, 11 8, 12 0 Z" fill={C.gold} opacity="0.9" />
-    </motion.svg>
   );
 }
 
@@ -499,7 +500,7 @@ function Features() {
   return (
     <section id="features" className="mx-auto max-w-6xl px-5 py-24 md:px-8 md:py-28">
       <SectionHead kicker="Features" title={<>Everything the workflow needs,<br />nothing it doesn&rsquo;t.</>}
-        sub="Real database, real auth, real role separation at the row level. Eight capabilities, shipped end to end." />
+        sub="Real database, real auth, real role separation at the row level. Nine capabilities, shipped end to end." />
       <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map((f, i) => (
           <Reveal key={f.title} delay={(i % 3) * 0.08}>
@@ -1005,6 +1006,7 @@ const FEATURES = [
   { icon: Bell, title: 'Notifications that reach', desc: 'In-app notifications fired on every lifecycle event and deep-linked back into the sheet.' },
   { icon: GitBranch, title: 'Rule-based escalations', desc: 'Configurable thresholds on stale approvals, routed up the org hierarchy automatically.' },
   { icon: Lock, title: 'An audit trail that lasts', desc: 'Who changed what and when, with a before/after JSON diff and one-click CSV export.' },
+  { icon: KeyRound, title: 'Entra ID single sign-on', desc: 'Sign in with Microsoft Entra ID; roles map straight from directory group membership, no extra setup.' },
 ];
 
 const STEPS = [
