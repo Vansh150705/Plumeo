@@ -65,7 +65,7 @@ export default async function ManagerHome() {
 
   return (
     <AppShell role="Manager">
-      <div className="p-8 max-w-7xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         <div>
           <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Team dashboard</div>
           <h1 className="font-serif text-4xl tracking-tight">{(reports?.length ?? 0)} direct reports</h1>

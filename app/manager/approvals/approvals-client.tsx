@@ -8,7 +8,7 @@ import { Textarea, Label } from '@/components/ui/input';
 import { Avatar } from '@/components/ui/avatar';
 import { Pill, StatusPill } from '@/components/ui/pill';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { CheckCircle2, RotateCcw, AlertCircle, Send, Lock } from 'lucide-react';
+import { CheckCircle2, RotateCcw, AlertCircle, Send, Lock, ChevronLeft } from 'lucide-react';
 import { approveSheet, returnSheet, upsertGoal } from '@/lib/actions';
 import { validateSheet, totalWeightage, formatTarget, uomLabel, MAX_GOALS_PER_SHEET } from '@/lib/goals';
 import type { Goal, GoalSheet, Cycle, AppUser } from '@/lib/types';
@@ -80,8 +80,11 @@ export function ApprovalsClient({
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)]">
-      {/* Sidebar */}
-      <aside className="w-80 shrink-0 border-r border-border bg-card/50 overflow-y-auto">
+      {/* Sidebar — full-width list on mobile, fixed rail on desktop. */}
+      <aside className={cn(
+        'w-full shrink-0 border-r border-border bg-card/50 overflow-y-auto md:w-80',
+        selectedId ? 'hidden md:block' : 'block',
+      )}>
         <div className="px-5 py-4 border-b border-border">
           <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Approvals queue</div>
           <div className="font-serif text-xl">
@@ -117,14 +120,21 @@ export function ApprovalsClient({
         </div>
       </aside>
 
-      {/* Detail */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Detail — hidden on mobile until a sheet is picked. */}
+      <div className={cn('flex-1 overflow-y-auto', selectedId ? 'block' : 'hidden md:block')}>
         {!selected ? (
           <div className="p-10 text-center text-sm text-muted-foreground">
             Select a sheet to review.
           </div>
         ) : (
-          <div className="p-8 max-w-4xl mx-auto space-y-5">
+          <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-5">
+            {/* Back to queue — mobile only */}
+            <button
+              onClick={() => setSelectedId(null)}
+              className="md:hidden -mb-1 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
+            >
+              <ChevronLeft className="size-4" /> Back to queue
+            </button>
             {/* Header */}
             <div className="flex items-end justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-4">
@@ -246,11 +256,11 @@ export function ApprovalsClient({
             {/* Actions */}
             {selected.status === 'Submitted' && (
               <Card className="sticky bottom-4 border-primary/20 bg-card/95 backdrop-blur-sm shadow-2xl">
-                <CardContent className="p-4 flex items-center justify-between gap-4">
+                <CardContent className="p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div className="text-sm text-muted-foreground">
                     Approve to lock this sheet for {cycle.name}, or return it with a comment.
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 shrink-0">
                     <Button variant="secondary" onClick={() => setReturnOpen(true)} disabled={pending}>
                       <RotateCcw className="size-3.5" /> Return for rework
                     </Button>

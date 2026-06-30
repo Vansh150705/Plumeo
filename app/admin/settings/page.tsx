@@ -13,7 +13,7 @@ export default async function AdminSettings() {
 
   return (
     <AppShell role="Admin">
-      <div className="p-8 max-w-5xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
         <div>
           <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Configuration</div>
           <h1 className="font-serif text-4xl tracking-tight">Settings</h1>

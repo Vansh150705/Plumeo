@@ -120,7 +120,7 @@ export function CheckInWorkspace({
 
   if (!sheetUnlocked && goals.length === 0) {
     return (
-      <div className="p-8 max-w-4xl mx-auto">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
         <Card><CardContent className="p-10 text-center text-sm text-muted-foreground">
           No goals to check in on yet.
         </CardContent></Card>
@@ -129,7 +129,7 @@ export function CheckInWorkspace({
   }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
       <div className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
@@ -200,7 +200,7 @@ export function CheckInWorkspace({
       {/* AI quarter summary */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="size-4 text-primary" />
               <div>

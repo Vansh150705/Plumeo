@@ -41,7 +41,7 @@ export function Inbox({ notifications: initial }: { notifications: Notification[
   const unreadCount = notifications.filter(n => !n.read_at).length;
 
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-5">
       <div className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Inbox</div>

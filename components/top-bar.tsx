@@ -37,7 +37,7 @@ export function TopBar({ user, notifications: initialNotifications, onMenu, onSe
   }
 
   return (
-    <header className="h-14 px-6 border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-30 flex items-center justify-between">
+    <header className="h-14 px-4 sm:px-6 border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-30 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <button onClick={onMenu} className="-ml-2 rounded-md p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground md:hidden" aria-label="Open menu">
           <Menu className="size-4" />
@@ -78,7 +78,7 @@ export function TopBar({ user, notifications: initialNotifications, onMenu, onSe
                 aria-label="Close"
                 onClick={() => setOpen(false)}
               />
-              <div className="absolute right-0 top-full mt-1.5 w-96 rounded-xl border border-border bg-card shadow-2xl z-50 overflow-hidden animate-fade-in">
+              <div className="absolute right-0 top-full mt-1.5 w-96 max-w-[calc(100vw-1.5rem)] rounded-xl border border-border bg-card shadow-2xl z-50 overflow-hidden animate-fade-in">
                 <div className="px-4 py-3 border-b border-border flex items-center justify-between">
                   <div className="text-sm font-semibold">Notifications</div>
                   <Link

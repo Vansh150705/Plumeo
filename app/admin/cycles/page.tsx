@@ -14,7 +14,7 @@ export default async function CyclesPage() {
 
   return (
     <AppShell role="Admin">
-      <div className="p-8 max-w-5xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
         <div>
           <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Configuration</div>
           <h1 className="font-serif text-4xl tracking-tight">Cycles</h1>
@@ -42,7 +42,7 @@ export default async function CyclesPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
                     <CycleWindow label="Goal setting" open={c.goal_window_start} close={c.goal_window_end} active={goalOpen} />
                     <CycleWindow label="Q1" open={c.q1_open} close={c.q1_close} active={aq === 'Q1'} />
                     <CycleWindow label="Q2" open={c.q2_open} close={c.q2_close} active={aq === 'Q2'} />
