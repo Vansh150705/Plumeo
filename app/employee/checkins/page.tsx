@@ -47,7 +47,7 @@ export default async function EmployeeCheckinsPage() {
         sheetStatus={sheet.status}
         viewerRole="Employee"
       />
-      <div className="px-8 pb-10 max-w-4xl mx-auto w-full">
+      <div className="px-4 sm:px-6 lg:px-8 pb-10 max-w-4xl mx-auto w-full">
         <FeedbackPanel
           subjectId={user.id}
           subjectName=""

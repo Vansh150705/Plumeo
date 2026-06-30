@@ -16,11 +16,11 @@ export default function Loading() {
 
       {/* Main content skeleton */}
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="h-14 px-6 border-b border-border flex items-center gap-3">
+        <div className="h-14 px-4 sm:px-6 border-b border-border flex items-center gap-3">
           <div className="h-3 w-20 rounded bg-muted/60 animate-pulse" />
           <div className="h-5 w-20 rounded-full bg-muted/40 animate-pulse" />
         </div>
-        <div className="flex-1 p-8 max-w-6xl mx-auto w-full space-y-6">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full space-y-6">
           <div className="space-y-2">
             <div className="h-3 w-24 rounded bg-muted/40 animate-pulse" />
             <div className="h-10 w-64 rounded bg-muted animate-pulse" />

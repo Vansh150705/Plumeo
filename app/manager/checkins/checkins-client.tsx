@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ChevronLeft } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
 import { Pill, StatusPill } from '@/components/ui/pill';
 import { CheckInWorkspace } from '@/components/checkin-workspace';
@@ -30,7 +31,11 @@ export function ManagerCheckinsClient({
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)]">
-      <aside className="w-72 shrink-0 border-r border-border bg-card/50 overflow-y-auto">
+      {/* Team list — full-width on mobile, fixed rail on desktop. */}
+      <aside className={cn(
+        'w-full shrink-0 border-r border-border bg-card/50 overflow-y-auto md:w-72',
+        selectedId ? 'hidden md:block' : 'block',
+      )}>
         <div className="px-5 py-4 border-b border-border">
           <div className="text-xs uppercase tracking-widest text-muted-foreground">Your team</div>
         </div>
@@ -56,7 +61,17 @@ export function ManagerCheckinsClient({
         </div>
       </aside>
 
-      <div className="flex-1 overflow-y-auto">
+      {/* Detail — hidden on mobile until a teammate is picked. */}
+      <div className={cn('flex-1 overflow-y-auto', selectedId ? 'block' : 'hidden md:block')}>
+        {/* Back to team — mobile only, always available once someone is selected. */}
+        {selectedId && (
+          <button
+            onClick={() => setSelectedId(null)}
+            className="md:hidden mt-4 ml-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
+          >
+            <ChevronLeft className="size-4" /> Back to team
+          </button>
+        )}
         {selected && sheet ? (
           <div>
             <CheckInWorkspace
@@ -68,7 +83,7 @@ export function ManagerCheckinsClient({
               viewerRole="Manager"
               employeeName={selected.full_name}
             />
-            <div className="px-8 pb-10 max-w-4xl">
+            <div className="px-4 sm:px-6 lg:px-8 pb-10 max-w-4xl">
               <FeedbackPanel
                 subjectId={selected.id}
                 subjectName={selected.full_name}
