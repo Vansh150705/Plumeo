@@ -94,6 +94,10 @@ describe('approval workflow', () => {
     expect(await code(decideApproval(await emp2.ctx(), req, { decision: 'approve' }))).toBe('not_found'); // peer cannot even see it
     expect(await code(decideApproval(await vp.ctx(), req, { decision: 'approve' }))).toBe('forbidden'); // skip-level manager can see it but is not the assigned approver
     expect((await listApprovalQueue(await mgr.ctx())).some((r: any) => r.goal_id === id)).toBe(true);
+    // the UI is only offered a decision panel to people who may actually decide
+    expect((await getGoalDetail(await emp1.ctx(), id)).permissions.decide).toBeNull();
+    expect((await getGoalDetail(await vp.ctx(), id)).permissions.decide).toBeNull();
+    expect((await getGoalDetail(await mgr.ctx(), id)).permissions.decide).toBe(req);
     const r = await decideApproval(await mgr.ctx(), req, { decision: 'approve', comment: 'Looks good' });
     expect(r.result).toBe('approved');
     const d = await getGoalDetail(await emp1.ctx(), id);

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { setupTestDb, teardownTestDb, makeOrg, activeCycle, goalInput, PASSWORD, type TestOrg } from './helpers';
+import { setupTestDb, teardownTestDb, makeOrg, activeCycle, goalInput, PASSWORD, ctxFor, type TestOrg } from './helpers';
 import { dispatch } from '@/server/http/framework';
 import '@/server/http/routes';
 import { handleScim } from '@/server/http/scim-routes';
@@ -226,7 +226,7 @@ describe('operations endpoints', () => {
 
 describe('SCIM over HTTP', () => {
   it('speaks application/scim+json and enforces the bearer token', async () => {
-    const t = (await createScimToken((await import('./helpers')).ctxFor ? await (await import('./helpers')).ctxFor(org.orgId, org.admin.userId) : org.admin, 'http')).token;
+    const t = (await createScimToken(await ctxFor(org.orgId, org.admin.userId), 'http')).token;
     const h = { authorization: `Bearer ${t}`, 'content-type': 'application/scim+json' };
     const unauth = await handleScim(new Request(`${BASE}/api/scim/v2/Users`), 'r');
     expect(unauth.status).toBe(401);

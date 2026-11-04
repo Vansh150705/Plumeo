@@ -333,3 +333,16 @@ export async function sendApprovalReminders(tx: Tx, orgId: string) {
   }
   return sent;
 }
+
+/** Non-throwing mirror of the authorisation rules in decideApproval — used to decide whether the UI should offer the decision panel. */
+export async function mayDecide(tx: Tx, ctx: Ctx, req: { approver_id: string | null }, goal: Pick<GoalRow, 'owner_id'>, amendment: { requested_by: string; changes?: { ownerId?: string } } | null): Promise<boolean> {
+  if (goal.owner_id === ctx.userId) return false;
+  if (amendment && (amendment.requested_by === ctx.userId || amendment.changes?.ownerId === ctx.userId)) return false;
+  const mayApprove = can(ctx, 'goals.approve') || can(ctx, 'goals.approve_any');
+  if (req.approver_id === ctx.userId) return mayApprove;
+  if (req.approver_id) {
+    const delegated = await tx.one(`select 1 from approval_delegations where org_id = $1 and delegator_id = $2 and delegate_id = $3 and revoked_at is null and now() between starts_at and ends_at`, [ctx.orgId, req.approver_id, ctx.userId]);
+    if (delegated) return true;
+  }
+  return can(ctx, 'goals.approve_any');
+}

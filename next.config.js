@@ -14,10 +14,9 @@ const csp = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
+  output: process.env.NEXT_OUTPUT === 'standalone' ? 'standalone' : undefined,
   poweredByHeader: false,
-  serverExternalPackages: ['pg', 'pdfkit', 'nodemailer'],
-  experimental: { serverComponentsExternalPackages: ['pg', 'pdfkit', 'nodemailer'] },
+  experimental: { serverComponentsExternalPackages: ['pg', 'pdfkit', 'nodemailer'], instrumentationHook: true },
   async headers() {
     return [{
       source: '/:path*',

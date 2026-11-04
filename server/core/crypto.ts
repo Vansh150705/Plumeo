@@ -39,14 +39,14 @@ export function passwordProblem(pw: string, minLength = 12): string | null {
 /** AES-256-GCM for secrets at rest. Format: v1.iv.tag.ciphertext (base64url). */
 export function encryptSecret(plain: string): string {
   const iv = randomBytes(12);
-  const c = createCipheriv('aes-256-gcm', config().encKey!, iv);
+  const c = createCipheriv('aes-256-gcm', config().encKey, iv);
   const enc = Buffer.concat([c.update(plain, 'utf8'), c.final()]);
   return ['v1', iv.toString('base64url'), c.getAuthTag().toString('base64url'), enc.toString('base64url')].join('.');
 }
 export function decryptSecret(blob: string): string {
   const [v, iv, tag, enc] = blob.split('.');
   if (v !== 'v1') throw new Error('unsupported secret format');
-  const d = createDecipheriv('aes-256-gcm', config().encKey!, Buffer.from(iv, 'base64url'));
+  const d = createDecipheriv('aes-256-gcm', config().encKey, Buffer.from(iv, 'base64url'));
   d.setAuthTag(Buffer.from(tag, 'base64url'));
   return Buffer.concat([d.update(Buffer.from(enc, 'base64url')), d.final()]).toString('utf8');
 }

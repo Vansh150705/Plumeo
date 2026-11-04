@@ -7,29 +7,31 @@ on:
 
 jobs:
   verify:
-    name: Typecheck & test
+    name: Typecheck, test (real Postgres) and build
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_USER: postgres, POSTGRES_PASSWORD: postgres, POSTGRES_DB: postgres }
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_ADMIN_URL: postgres://postgres:postgres@localhost:5432/postgres
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Unit tests
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run typecheck
+      - name: Create restricted application role used by the tests
+        run: |
+          psql "$TEST_ADMIN_URL" -c "create role plumeo_app_role nologin" -c "create role plumeo_app login password 'plumeo_app' in role plumeo_app_role"
+      - name: Tests (tenant isolation, security, workflows, API, SCIM, OIDC)
         run: npm test
-
       - name: Build
         run: npm run build
-        env:
-          # Build-time placeholders so `next build` can statically analyse the app
-          # without real secrets. Runtime still requires the real values.
-          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+        env: { APP_URL: 'http://localhost:3000' }
+      - name: Dependency audit (high severity and above)
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true

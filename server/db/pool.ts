@@ -12,7 +12,7 @@ const g = globalThis as unknown as { __plumeoPool?: Pool };
 export function pool(): Pool {
   if (!g.__plumeoPool) {
     const p = new Pool({
-      connectionString: config().DATABASE_URL,
+      connectionString: config().DATABASE_URL ?? (() => { throw new Error('DATABASE_URL is not set'); })(),
       max: config().DB_POOL_MAX,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 10_000,

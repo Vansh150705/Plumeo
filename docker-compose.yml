@@ -1,0 +1,53 @@
+# Local / single-host deployment: Postgres + one-shot migrations + web + worker.
+#   cp .env.example .env   (set the secrets!)   &&   docker compose up --build
+# For production put a TLS-terminating reverse proxy in front of `app` and use a managed or backed-up Postgres.
+x-app: &app
+  build: .
+  image: plumeo:latest
+  environment: &env
+    NODE_ENV: production
+    APP_URL: ${APP_URL:-http://localhost:3000}
+    DATABASE_URL: postgres://plumeo_app:${APP_DB_PASSWORD:?set APP_DB_PASSWORD}@db:5432/plumeo
+    MIGRATION_DATABASE_URL: postgres://plumeo:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/plumeo
+    APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:?generate with: openssl rand -base64 32}
+    CRON_SECRET: ${CRON_SECRET:-}
+    SMTP_URL: ${SMTP_URL:-}
+    SMTP_FROM: ${SMTP_FROM:-Plumeo <no-reply@localhost>}
+    GROQ_API_KEY: ${GROQ_API_KEY:-}
+    ALLOW_SELF_SERVICE_SIGNUP: ${ALLOW_SELF_SERVICE_SIGNUP:-false}
+  depends_on: { db: { condition: service_healthy } }
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: plumeo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: plumeo
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?set APP_DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./deploy/init-db.sh:/docker-entrypoint-initdb.d/10-init-db.sh:ro
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U plumeo -d plumeo"], interval: 5s, timeout: 5s, retries: 20 }
+    restart: unless-stopped
+
+  migrate:
+    <<: *app
+    command: ["npm", "run", "migrate"]
+    restart: "no"
+
+  app:
+    <<: *app
+    command: ["npm", "start"]
+    ports: ["3000:3000"]
+    depends_on: { db: { condition: service_healthy }, migrate: { condition: service_completed_successfully } }
+    restart: unless-stopped
+
+  worker:
+    <<: *app
+    command: ["npm", "run", "worker"]
+    depends_on: { db: { condition: service_healthy }, migrate: { condition: service_completed_successfully } }
+    restart: unless-stopped
+
+volumes:
+  pgdata:

@@ -171,3 +171,8 @@ export async function dispatch(req: Request, prefix = '/api/v1'): Promise<Respon
 }
 
 export { json };
+
+/** For documentation generation and tests: every registered endpoint. */
+export function listRoutes() {
+  return routes.map((r) => ({ method: r.method, path: '/' + r.parts.join('/'), public: !!r.opts.public, idempotent: r.opts.idempotent === true }));
+}

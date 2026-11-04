@@ -276,7 +276,7 @@ export async function deleteDraftGoal(ctx: Ctx, goalId: string) {
 export interface GoalFilters {
   cycleId?: string; level?: string[]; status?: string[]; ownerId?: string; departmentId?: string; teamId?: string; parentGoalId?: string | 'none';
   priority?: string[]; q?: string; mine?: boolean; dueBefore?: string; dueAfter?: string; risk?: string[]; sort?: string; order?: 'asc' | 'desc';
-  limit?: number; offset?: number;
+  limit?: number; offset?: number; noCount?: boolean;
 }
 
 const SORTS: Record<string, string> = {
@@ -319,25 +319,32 @@ export async function listGoals(ctx: Ctx, f: GoalFilters): Promise<Page<any>> {
       left join goals pg on pg.org_id = g.org_id and pg.id = g.parent_goal_id`;
     const sort = SORTS[f.sort ?? 'updated'] ?? SORTS.updated;
     const order = f.order === 'asc' ? 'asc' : 'desc';
-    const riskFilter = f.risk?.length;
-    // risk is derived from progress, so when filtering by it we fetch a wider window then trim.
-    const rows = await tx.query<any>(
-      `select ${GOAL_COLS}, ou.full_name as owner_name, dd.name as department_name, tt.name as team_name, pg.title as parent_title,
+    const detailSql = (idFilter: string) => `select ${GOAL_COLS}, ou.full_name as owner_name, dd.name as department_name, tt.name as team_name, pg.title as parent_title,
          (select count(*)::int from key_results k where k.org_id = g.org_id and k.goal_id = g.id and k.removed_at is null) as kr_count,
          (select count(*)::int from goals c where c.org_id = g.org_id and c.parent_goal_id = g.id and c.deleted_at is null) as child_count
-       ${from} where ${where} order by ${sort} ${order} nulls last, g.id ${riskFilter ? '' : `limit ${limit} offset ${offset}`}`, params);
-    const total = riskFilter ? -1 : (await tx.one<{ n: number }>(`select count(*)::int as n ${from} where ${where}`, params))!.n;
-    const prog = await loadProgress(tx, ctx.orgId, rows.map((r) => r.id));
-    let items = rows.map((r) => {
+       ${from} where ${where} ${idFilter}`;
+    const decorate = (rows: any[], prog: Awaited<ReturnType<typeof loadProgress>>) => rows.map((r) => {
       const p = prog.get(r.id);
       return { ...r, progress: p?.effective ?? null, own_progress: p?.own ?? null, contributors: p?.contributors ?? 0, risk: riskFor(r, p, policy) };
     });
-    if (riskFilter) {
-      items = items.filter((i) => f.risk!.includes(i.risk));
-      const t = items.length;
-      return { data: items.slice(offset, offset + limit), page: { limit, offset, total: t } };
+
+    if (f.risk?.length) {
+      // Risk is derived from progress, so it cannot be filtered in SQL. Phase 1 scores a LIGHT projection of every candidate
+      // (no per-row subqueries); phase 2 loads full detail for just the requested page.
+      const onlyActive = !f.risk.some((x) => x === 'unknown' || x === 'done');
+      const light = await tx.query<any>(`select g.id, g.status, g.start_date, g.due_date ${from} where ${where} ${onlyActive ? "and g.status = 'active'" : ''} order by ${sort} ${order} nulls last, g.id`, params);
+      const prog = await loadProgress(tx, ctx.orgId, light.map((r) => r.id));
+      const matching = light.filter((r) => f.risk!.includes(riskFor(r, prog.get(r.id), policy)));
+      const pageIds = matching.slice(offset, offset + limit).map((r) => r.id);
+      const full = pageIds.length ? await tx.query<any>(detailSql('and g.id = any($' + (params.length + 1) + '::uuid[])'), [...params, pageIds]) : [];
+      const order2 = new Map(pageIds.map((id, i) => [id, i]));
+      full.sort((a, b) => order2.get(a.id)! - order2.get(b.id)!);
+      return { data: decorate(full, prog), page: { limit, offset, total: matching.length } };
     }
-    return { data: items, page: { limit, offset, total } };
+    const rows = await tx.query<any>(`${detailSql('')} order by ${sort} ${order} nulls last, g.id limit ${limit} offset ${offset}`, params);
+    const total = f.noCount ? -1 : (await tx.one<{ n: number }>(`select count(*)::int as n ${from} where ${where}`, params))!.n;
+    const prog = await loadProgress(tx, ctx.orgId, rows.map((r) => r.id));
+    return { data: decorate(rows, prog), page: { limit, offset, total } };
   });
 }
 
@@ -405,6 +412,12 @@ export async function getGoalDetail(ctx: Ctx, goalId: string) {
     const collab = !isOwner && (await isCollaborator(tx, ctx.orgId, goalId, ctx.userId));
     const pending = approvals.find((a: any) => a.status === 'pending');
     const open = ['active'].includes(g.status);
+    let decideId: string | null = null;
+    if (pending) {
+      const { mayDecide } = await import('./approvals');
+      const am = pending.amendment_id ? await tx.one<any>('select requested_by, changes from goal_amendments where org_id = $1 and id = $2', [ctx.orgId, pending.amendment_id]) : null;
+      if (await mayDecide(tx, ctx, { approver_id: pending.approver_id }, g, am)) decideId = pending.id;
+    }
     const lint = lintGoal({ title: g.title, description: g.description, expected_outcome: g.expected_outcome }, krRows);
 
     return {
@@ -423,7 +436,7 @@ export async function getGoalDetail(ctx: Ctx, goalId: string) {
         cancel: (mgr || isOwner || can(ctx, 'goals.reassign')) && !['completed', 'cancelled'].includes(g.status),
         amend: (isOwner || mgr || can(ctx, 'goals.reassign')) && open && !amendments.some((a: any) => a.status === 'pending_approval'),
         transfer: can(ctx, 'goals.reassign') && ['active', 'draft', 'changes_requested'].includes(g.status),
-        decide: pending ? pending.id : null,
+        decide: decideId,
       },
     };
   });

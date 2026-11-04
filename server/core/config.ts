@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const schema = z.object({
   NODE_ENV: z.string().default('development'),
-  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+  DATABASE_URL: z.string().optional(),
   DB_POOL_MAX: z.coerce.number().int().min(1).max(200).default(10),
   APP_URL: z.string().url().default('http://localhost:3000'),
   // 32 bytes, base64 or 64 hex chars. Encrypts stored secrets (SSO client secret, webhook URLs).
@@ -25,21 +25,20 @@ export type Config = ReturnType<typeof loadConfig>;
 function loadConfig() {
   const env = schema.parse(process.env);
   const prod = env.NODE_ENV === 'production';
-  let encKey: Buffer | null = null;
-  if (env.APP_ENCRYPTION_KEY) {
-    const k = env.APP_ENCRYPTION_KEY;
-    encKey = /^[0-9a-f]{64}$/i.test(k) ? Buffer.from(k, 'hex') : Buffer.from(k, 'base64');
-    if (encKey.length !== 32) throw new Error('APP_ENCRYPTION_KEY must decode to exactly 32 bytes');
-  } else if (prod) {
-    throw new Error('APP_ENCRYPTION_KEY is required in production');
-  } else {
-    // Development convenience only: a fixed key so local data survives restarts.
-    encKey = Buffer.alloc(32, 'plumeo-dev-key');
-  }
+  const readKey = (): Buffer => {
+    if (env.APP_ENCRYPTION_KEY) {
+      const k = env.APP_ENCRYPTION_KEY;
+      const key = /^[0-9a-f]{64}$/i.test(k) ? Buffer.from(k, 'hex') : Buffer.from(k, 'base64');
+      if (key.length !== 32) throw new Error('APP_ENCRYPTION_KEY must decode to exactly 32 bytes (use: openssl rand -base64 32)');
+      return key;
+    }
+    if (prod) throw new Error('APP_ENCRYPTION_KEY is required in production (use: openssl rand -base64 32)');
+    return Buffer.alloc(32, 'plumeo-dev-key'); // development convenience only
+  };
   return {
     ...env,
     isProd: prod,
-    encKey,
+    get encKey() { return readKey(); },
     allowSignup: env.ALLOW_SELF_SERVICE_SIGNUP ? env.ALLOW_SELF_SERVICE_SIGNUP === 'true' : !prod,
     oidcAllowHttp: env.OIDC_ALLOW_INSECURE_HTTP === 'true' && !prod,
     secureCookies: env.APP_URL.startsWith('https://'),

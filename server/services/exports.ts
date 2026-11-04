@@ -27,7 +27,7 @@ export async function exportGoalsCsv(ctx: Ctx, f: GoalFilters) {
   requirePerm(ctx, 'exports.run');
   const all: any[] = [];
   for (let offset = 0; offset < 10000; offset += 200) {
-    const page = await listGoals(ctx, { ...f, limit: 200, offset });
+    const page = await listGoals(ctx, { ...f, limit: 200, offset, noCount: true, sort: 'created', order: 'asc' });
     all.push(...page.data);
     if (page.data.length < 200) break;
   }
