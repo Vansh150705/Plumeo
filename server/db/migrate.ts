@@ -18,6 +18,8 @@ export async function migrate(connectionString: string, dir = path.join(process.
     await client.query('select pg_advisory_lock(727274)');
     await client.query(`create table if not exists schema_migrations (
       name text primary key, checksum text not null, applied_at timestamptz not null default now())`);
+    await client.query(`do $$ begin if exists (select 1 from pg_roles where rolname = 'plumeo_app_role') then
+      grant select on schema_migrations to plumeo_app_role; end if; end $$`);
     const done = new Map<string, string>(
       (await client.query('select name, checksum from schema_migrations')).rows.map((r) => [r.name, r.checksum]),
     );
@@ -39,6 +41,8 @@ export async function migrate(connectionString: string, dir = path.join(process.
         throw new Error(`Migration ${file} failed: ${(e as Error).message}`);
       }
     }
+    await client.query(`do $$ begin if exists (select 1 from pg_roles where rolname = 'plumeo_app_role') then
+      grant select on schema_migrations to plumeo_app_role; end if; end $$`);
   } finally {
     await client.query('select pg_advisory_unlock(727274)').catch(() => {});
     await client.end();
