@@ -9,6 +9,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Pill, StatusPill } from '@/components/ui/pill';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { CheckCircle2, RotateCcw, AlertCircle, Send, Lock, ChevronLeft } from 'lucide-react';
+import { toast } from 'sonner';
 import { approveSheet, returnSheet, upsertGoal } from '@/lib/actions';
 import { validateSheet, totalWeightage, formatTarget, uomLabel, MAX_GOALS_PER_SHEET } from '@/lib/goals';
 import type { Goal, GoalSheet, Cycle, AppUser } from '@/lib/types';
@@ -45,7 +46,9 @@ export function ApprovalsClient({
     if (!selected) return;
     if (!confirm(`Approve ${selected.employee.full_name}'s goal sheet? This will lock it for the cycle.`)) return;
     startTransition(async () => {
-      await approveSheet(selected.id);
+      const res = await approveSheet(selected.id);
+      if (!res.ok) toast.error(res.error);
+      else toast.success('Goal sheet approved and locked.');
       router.refresh();
     });
   }
@@ -53,9 +56,14 @@ export function ApprovalsClient({
   function handleReturn() {
     if (!selected || !returnComment.trim()) return;
     startTransition(async () => {
-      await returnSheet(selected.id, returnComment);
-      setReturnOpen(false);
-      setReturnComment('');
+      const res = await returnSheet(selected.id, returnComment);
+      if (!res.ok) {
+        toast.error(res.error);
+      } else {
+        toast.success('Sheet returned for rework.');
+        setReturnOpen(false);
+        setReturnComment('');
+      }
       router.refresh();
     });
   }
@@ -68,7 +76,11 @@ export function ApprovalsClient({
   function saveEdit() {
     if (!editingGoalId) return;
     startTransition(async () => {
-      await upsertGoal({ ...editForm, id: editingGoalId, sheet_id: selected!.id });
+      const res = await upsertGoal({ ...editForm, id: editingGoalId, sheet_id: selected!.id });
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
       setEditingGoalId(null);
       router.refresh();
     });

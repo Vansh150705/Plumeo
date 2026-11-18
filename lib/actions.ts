@@ -2,7 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
-import { validateSheet, computeScore, activeQuarter } from '@/lib/goals';
+import { validateSheet, computeScore } from '@/lib/goals';
+import { sweepEscalations } from '@/lib/escalation';
 import type { Goal, CheckIn } from '@/lib/types';
 import { ok, fail } from '@/lib/result';
 import {
@@ -96,12 +97,16 @@ export async function submitSheet(sheet_id: string) {
     return fail('Resolve the highlighted issues before submitting.', issues);
   }
 
+  // Only the owner's own Draft/Returned sheet can be submitted; RLS enforces the same rule.
   const { data: sheet } = await supabase
     .from('goal_sheets')
     .update({ status: 'Submitted', submitted_at: new Date().toISOString() })
     .eq('id', sheet_id)
+    .eq('employee_id', appUser.id)
+    .in('status', ['Draft', 'Returned'])
     .select()
-    .single();
+    .maybeSingle();
+  if (!sheet) return fail('This sheet can no longer be submitted. Refresh and try again.');
 
   await audit('sheet', sheet_id, 'submit', null, sheet);
 
@@ -126,6 +131,8 @@ export async function approveSheet(sheet_id: string) {
   const { supabase, appUser } = await requireUser();
   if (appUser.role !== 'Manager' && appUser.role !== 'Admin') throw new Error('FORBIDDEN');
 
+  // Only a Submitted sheet can be approved. If nothing matched, the sheet changed under us or
+  // the caller is not its reviewer, so report that instead of a false success.
   const { data: sheet } = await supabase
     .from('goal_sheets')
     .update({
@@ -135,12 +142,14 @@ export async function approveSheet(sheet_id: string) {
       locked_at: new Date().toISOString(),
     })
     .eq('id', sheet_id)
+    .eq('status', 'Submitted')
     .select('*, employee:users!goal_sheets_employee_id_fkey(*)')
-    .single();
+    .maybeSingle();
+  if (!sheet) return fail('This sheet is no longer awaiting your approval.');
 
   await audit('sheet', sheet_id, 'approve', null, sheet);
 
-  if (sheet?.employee) {
+  if (sheet.employee) {
     await notify({
       recipient_id: sheet.employee.id,
       subject: 'Your goal sheet was approved',
@@ -168,12 +177,14 @@ export async function returnSheet(sheet_id: string, comment: string) {
       return_comment: comment,
     })
     .eq('id', sheet_id)
+    .eq('status', 'Submitted')
     .select('*, employee:users!goal_sheets_employee_id_fkey(*)')
-    .single();
+    .maybeSingle();
+  if (!sheet) return fail('This sheet is no longer awaiting your review.');
 
   await audit('sheet', sheet_id, 'return', null, sheet, comment);
 
-  if (sheet?.employee) {
+  if (sheet.employee) {
     await notify({
       recipient_id: sheet.employee.id,
       subject: 'Your goal sheet was returned for rework',
@@ -453,147 +464,16 @@ export async function withdrawFeedback(feedback_id: string) {
   return ok({});
 }
 
-// ----- escalation engine: run by the nightly cron, or on demand from the admin UI -----
+// ----- escalation engine: nightly cron (/api/cron/escalations) and on demand from the admin UI -----
 export async function runEscalationSweep() {
   const { supabase, appUser } = await requireUser();
   if (appUser.role !== 'Admin') throw new Error('FORBIDDEN');
-
-  const { data: rules } = await supabase.from('escalation_rules').select('*').eq('is_active', true);
-  const { data: cycle } = await supabase.from('cycles').select('*').eq('is_active', true).single();
-  if (!rules || !cycle) return ok({ triggered: 0 });
-
-  const { data: sheets } = await supabase
-    .from('goal_sheets')
-    .select('*, employee:users!goal_sheets_employee_id_fkey(*)')
-    .eq('cycle_id', cycle.id);
-  if (!sheets) return ok({ triggered: 0 });
-
-  const now = Date.now();
-  const daysSince = (d: string | null) => d ? Math.floor((now - new Date(d).getTime()) / 86400000) : Infinity;
-
-  // --- Pre-load everything the sweep needs, once, instead of per (rule, sheet). ---
-
-  // Which quarter is open, and how long has it been open? Drives checkin_overdue.
-  const quarter = activeQuarter(cycle);
-  const quarterOpenedDaysAgo = quarter
-    ? daysSince((cycle as any)[`${quarter.toLowerCase()}_open`])
-    : Infinity;
-
-  // Goals + their check-ins for the current quarter, so we can tell which
-  // approved sheets are missing a check-in. One query each, not one per sheet.
-  const approvedSheetIds = sheets.filter((s) => s.status === 'Approved').map((s) => s.id);
-  const goalsBySheet = new Map<string, { id: string }[]>();
-  const checkedGoalIds = new Set<string>();
-  if (quarter && approvedSheetIds.length) {
-    const { data: goals } = await supabase
-      .from('goals')
-      .select('id, sheet_id')
-      .in('sheet_id', approvedSheetIds);
-    for (const g of goals ?? []) {
-      const arr = goalsBySheet.get(g.sheet_id) ?? [];
-      arr.push({ id: g.id });
-      goalsBySheet.set(g.sheet_id, arr);
-    }
-    const goalIds = (goals ?? []).map((g) => g.id);
-    if (goalIds.length) {
-      const { data: checkIns } = await supabase
-        .from('check_ins')
-        .select('goal_id')
-        .eq('quarter', quarter)
-        .in('goal_id', goalIds);
-      for (const c of checkIns ?? []) checkedGoalIds.add(c.goal_id);
-    }
+  try {
+    const { triggered } = await sweepEscalations(supabase);
+    revalidatePath('/admin');
+    return ok({ triggered });
+  } catch (err) {
+    console.error('Escalation sweep failed:', err);
+    return fail('The escalation sweep failed. Please try again.');
   }
-
-  // Recently-fired events, once, to de-dupe within 24h.
-  const { data: recentEvents } = await supabase
-    .from('escalation_events')
-    .select('rule_id, subject_id')
-    .gte('triggered_at', new Date(now - 86400000).toISOString());
-  const firedRecently = new Set(
-    (recentEvents ?? []).map((e) => `${e.rule_id}:${e.subject_id}`),
-  );
-
-  // Resolve the HR recipient + a manager→skip-level map up front.
-  const { data: hrAdmin } = await supabase.from('users').select('id').eq('role', 'Admin').limit(1).maybeSingle();
-  const managerIds = Array.from(
-    new Set(sheets.map((s) => s.employee?.manager_id).filter(Boolean) as string[]),
-  );
-  const skipLevelByManager = new Map<string, string | null>();
-  if (managerIds.length) {
-    const { data: mgrs } = await supabase.from('users').select('id, manager_id').in('id', managerIds);
-    for (const m of mgrs ?? []) skipLevelByManager.set(m.id, m.manager_id ?? null);
-  }
-
-  const events: { rule_id: string; subject_id: string; sheet_id: string; level: string; reason: string }[] = [];
-  const notifications: Parameters<typeof notify>[0][] = [];
-
-  for (const rule of rules) {
-    for (const sheet of sheets) {
-      const employee = sheet.employee;
-      if (!employee) continue;
-      let reason = '';
-
-      if (rule.trigger_type === 'goal_not_submitted') {
-        if (sheet.status === 'Draft') {
-          const since = daysSince(cycle.goal_window_start);
-          if (since >= rule.threshold_days) reason = `Sheet still in Draft ${since} days after cycle opened.`;
-        }
-      } else if (rule.trigger_type === 'approval_pending') {
-        if (sheet.status === 'Submitted' && sheet.submitted_at) {
-          const since = daysSince(sheet.submitted_at);
-          if (since >= rule.threshold_days) reason = `Submitted ${since} days ago, still awaiting approval.`;
-        }
-      } else if (rule.trigger_type === 'checkin_overdue') {
-        // Only meaningful once a quarter has been open at least threshold_days.
-        if (quarter && sheet.status === 'Approved' && quarterOpenedDaysAgo >= rule.threshold_days) {
-          const goals = goalsBySheet.get(sheet.id) ?? [];
-          const missing = goals.filter((g) => !checkedGoalIds.has(g.id));
-          if (goals.length > 0 && missing.length > 0) {
-            reason = `${missing.length} of ${goals.length} goals have no ${quarter} check-in (${quarterOpenedDaysAgo} days into the quarter).`;
-          }
-        }
-      }
-
-      if (!reason) continue;
-
-      const dedupeKey = `${rule.id}:${employee.id}`;
-      if (firedRecently.has(dedupeKey)) continue;
-      firedRecently.add(dedupeKey); // also de-dupe across rules within this run
-
-      events.push({
-        rule_id: rule.id,
-        subject_id: employee.id,
-        sheet_id: sheet.id,
-        level: rule.escalate_to,
-        reason,
-      });
-
-      // Resolve who to notify from the pre-loaded maps.
-      let recipient_id: string | null = null;
-      if (rule.escalate_to === 'Employee') recipient_id = employee.id;
-      else if (rule.escalate_to === 'Manager') recipient_id = employee.manager_id;
-      else if (rule.escalate_to === 'HR') recipient_id = hrAdmin?.id ?? null;
-      else if (rule.escalate_to === 'SkipLevel' && employee.manager_id) {
-        recipient_id = skipLevelByManager.get(employee.manager_id) ?? null;
-      }
-
-      if (recipient_id) {
-        notifications.push({
-          recipient_id,
-          subject: `Escalation: ${rule.name}`,
-          body: `${employee.full_name}: ${reason}`,
-          deep_link: `/admin/escalations`,
-          payload: { event: 'escalation', rule_id: rule.id, subject_id: employee.id },
-        });
-      }
-    }
-  }
-
-  // One batched insert for the events, then fan out the notifications.
-  if (events.length) await supabase.from('escalation_events').insert(events);
-  await Promise.all(notifications.map((n) => notify(n)));
-
-  revalidatePath('/admin');
-  return ok({ triggered: events.length });
 }
