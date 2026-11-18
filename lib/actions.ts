@@ -438,16 +438,7 @@ export async function giveFeedback(input: unknown) {
     .single();
   if (error) return fail(error.message);
 
-  // Only ping the subject when the feedback is meant to be shared with them.
-  if (data.visibility === 'Manager') {
-    await notify({
-      recipient_id: data.subject_id,
-      subject: `New feedback from ${appUser.full_name}`,
-      body: `${appUser.full_name} shared feedback on your goals: "${data.comment}"`,
-      deep_link: '/employee/checkins',
-      payload: { event: 'feedback_received', feedback_id: row.id },
-    });
-  }
+  // Shared feedback notifies its subject via a database trigger (migration 0005), with fixed wording.
 
   revalidatePath('/manager');
   revalidatePath('/employee');

@@ -148,8 +148,10 @@ drop policy if exists "audit_insert_self" on public.audit_log;
 create policy "audit_insert_self" on public.audit_log for insert to authenticated
   with check (actor_id = auth.uid());
 
--- You may notify: yourself, your manager, your direct reports, anyone you left feedback about,
--- or (Admin) anyone, which the escalation sweep needs.
+-- You may notify: yourself, your manager, your direct reports, or (Admin) anyone, which the
+-- escalation sweep needs. Peer-feedback notifications are NOT allowed through this policy:
+-- anyone can leave feedback about anyone, so "I left feedback about them" would let any user
+-- send arbitrary text to any user. They are created by the trigger below, with fixed wording.
 drop policy if exists "notif_insert_any" on public.notifications;
 drop policy if exists "notif_insert_related" on public.notifications;
 create policy "notif_insert_related" on public.notifications for insert to authenticated
@@ -158,8 +160,30 @@ create policy "notif_insert_related" on public.notifications for insert to authe
     or public.is_manager_of(recipient_id)
     or recipient_id = (select u.manager_id from public.users u where u.id = auth.uid())
     or public.current_user_role() = 'Admin'
-    or exists (select 1 from public.feedback f where f.author_id = auth.uid() and f.subject_id = recipient_id)
   );
+
+-- Shared feedback notifies its subject, from a trusted server-side path with a fixed template.
+create or replace function public.notify_on_feedback() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare author_name text;
+begin
+  if new.visibility = 'Manager' then
+    select full_name into author_name from public.users where id = new.author_id;
+    insert into public.notifications (recipient_id, channel, subject, body, deep_link, payload)
+    values (
+      new.subject_id, 'InApp',
+      'New feedback from ' || coalesce(author_name, 'a colleague'),
+      coalesce(author_name, 'A colleague') || ' shared feedback on your goals: "' || left(new.comment, 500) || '"',
+      '/employee/checkins',
+      jsonb_build_object('event', 'feedback_received', 'feedback_id', new.id)
+    );
+  end if;
+  return new;
+end; $$;
+
+drop trigger if exists trg_feedback_notify on public.feedback;
+create trigger trg_feedback_notify after insert on public.feedback
+  for each row execute function public.notify_on_feedback();
 
 -- Your own notifications can be marked read, but not handed to someone else.
 drop policy if exists "notif_update_own" on public.notifications;

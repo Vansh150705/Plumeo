@@ -134,7 +134,6 @@ describe('legitimate flows keep working', () => {
   legit('employee notifies own manager', { uid: ID.emp, sql: `insert into notifications (recipient_id,channel,subject,body) values ('${ID.mgr}','InApp','s','b')` });
   legit('manager notifies own report', { uid: ID.mgr, sql: `insert into notifications (recipient_id,channel,subject,body) values ('${ID.emp}','InApp','s','b')` });
   legit('admin notifies anyone (escalation fan-out)', { uid: ID.admin, sql: `insert into notifications (recipient_id,channel,subject,body) values ('${ID.other}','InApp','s','b')` });
-  legit('peer notifies the subject after leaving feedback', { uid: ID.emp2, setup: `insert into feedback (subject_id,author_id,rating,comment) values ('${ID.emp}','${ID.emp2}',4,'nice')`, sql: `insert into notifications (recipient_id,channel,subject,body) values ('${ID.emp}','InApp','s','b')` });
   legit('user marks own notification read', { uid: ID.emp, setup: `insert into notifications (id,recipient_id,channel,subject,body) values ('${NOTIF}','${ID.emp}','InApp','s','b')`, sql: `update notifications set read_at=now() where id='${NOTIF}'` });
   legit('user writes own audit row', { uid: ID.emp, sql: `insert into audit_log (entity_type,entity_id,action,actor_id,actor_name) values ('sheet','${SHEET}','submit','${ID.emp}','Emp')` });
   legit('user edits own profile (name, colour)', { uid: ID.emp, sql: `update users set full_name='Emp R', avatar_color='#fff' where id='${ID.emp}'` });
@@ -142,6 +141,31 @@ describe('legitimate flows keep working', () => {
   legit('admin inserts an escalation event', { uid: ID.admin, sql: `insert into escalation_events (subject_id,level,reason) values ('${ID.emp}','HR','late')` });
   legit('signed-in user can read the users directory', { uid: ID.emp, sql: `select id from users` });
   legit('trusted backend (service role, no JWT) can change a role', { role: 'service_role', sql: `update users set role='Manager' where id='${ID.emp2}'` });
+});
+
+describe('feedback notifications come from the trigger, with fixed wording', () => {
+  const count = async (where: string) =>
+    Number((await db.query<{ n: number }>(`select count(*)::int as n from notifications where ${where}`)).rows[0].n);
+
+  it('shared feedback notifies the subject, even though the author cannot insert notifications directly', async () => {
+    await db.exec('begin');
+    try {
+      await db.exec(`set role authenticated; select set_config('request.jwt.claim.sub','${ID.emp2}',false);`);
+      await db.query(`insert into feedback (subject_id,author_id,rating,comment,visibility) values ('${ID.emp}','${ID.emp2}',4,'great work','Manager')`);
+      await db.exec('reset role');
+      expect(await count(`recipient_id='${ID.emp}' and payload->>'event'='feedback_received' and subject='New feedback from Emp2'`)).toBe(1);
+    } finally { await db.exec('rollback'); }
+  });
+
+  it('private feedback does not notify the subject', async () => {
+    await db.exec('begin');
+    try {
+      await db.exec(`set role authenticated; select set_config('request.jwt.claim.sub','${ID.emp2}',false);`);
+      await db.query(`insert into feedback (subject_id,author_id,rating,comment,visibility) values ('${ID.emp}','${ID.emp2}',2,'hidden','Private')`);
+      await db.exec('reset role');
+      expect(await count(`recipient_id='${ID.emp}'`)).toBe(0);
+    } finally { await db.exec('rollback'); }
+  });
 });
 
 describe('attacks and state-machine violations are rejected', () => {
@@ -153,6 +177,11 @@ describe('attacks and state-machine violations are rejected', () => {
   block('audit row with no actor', { uid: ID.emp, sql: `insert into audit_log (entity_type,entity_id,action,actor_name) values ('sheet','${SHEET}','approve','nobody')` });
   block('notification to an unrelated user', { uid: ID.emp, sql: `insert into notifications (recipient_id,channel,subject,body) values ('${ID.admin}','InApp','phish','click')` });
   block("hijacking own notification into another user's inbox", { uid: ID.emp, setup: `insert into notifications (id,recipient_id,channel,subject,body) values ('${NOTIF}','${ID.emp}','InApp','s','b')`, sql: `update notifications set recipient_id='${ID.emp2}' where id='${NOTIF}'` });
+  block('notifying someone just because you left feedback about them', {
+    uid: ID.emp2,
+    setup: `insert into feedback (subject_id,author_id,rating,comment) values ('${ID.emp}','${ID.emp2}',4,'x')`,
+    sql: `insert into notifications (recipient_id,channel,subject,body) values ('${ID.emp}','InApp','phish','click')`,
+  });
   block('non-admin forging escalation events', { uid: ID.emp, sql: `insert into escalation_events (subject_id,level,reason) values ('${ID.emp2}','HR','forged')` });
   block('employee self-approving own submitted sheet', { uid: ID.emp, setup: SUBMITTED, sql: `update goal_sheets set status='Approved', approved_by='${ID.emp}', approved_at=now(), locked_at=now() where id='${SHEET}'` });
   block("employee approving a peer's sheet", { uid: ID.emp, setup: `update goal_sheets set status='Submitted' where id='${SHEET2}'`, sql: `update goal_sheets set status='Approved' where id='${SHEET2}'` });
