@@ -13,7 +13,9 @@
     "migrate": "tsx scripts/migrate.ts",
     "platform:admin": "tsx scripts/create-platform-admin.ts",
     "worker": "tsx scripts/worker.ts",
-    "loadtest": "tsx scripts/loadtest.ts"
+    "loadtest": "tsx scripts/loadtest.ts",
+    "db:setup": "tsx scripts/db-setup.ts",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.2",

@@ -183,12 +183,12 @@ npm run worker                  # background deliveries + reminders (separate pr
 
 Demo (after `npm run seed`): workspace `northwind`, password `PlumeoDemo!2026` (override with `SEED_PASSWORD`) — `priya.shah@` (org admin), `hana.okafor@` (HR), `lakshmi.raman@` / `arjun.mehta@` (department heads), `kabir.malhotra@` (manager), `ananya.sharma@`, `rohan.kapoor@`, … `@northwind.test`. **Development data only.**
 
-Operator tasks: `PLATFORM_ADMIN_PASSWORD=… npm run platform:admin -- you@example.com "Your Name"` (then `/platform`); `npx tsx scripts/gen-api-docs.ts`. All environment variables are documented in `.env.example`.
+Operator tasks: `npm run db:setup` (fresh database bootstrap: restricted role + migrations), `npm run smoke` (post-deploy checks), `PLATFORM_ADMIN_PASSWORD=… npm run platform:admin -- you@example.com "Your Name"` (then `/platform`); `npx tsx scripts/gen-api-docs.ts`. All environment variables are documented in `.env.example`.
 
 ## Deployment
 
 * **Docker Compose** (`docker-compose.yml`, `Dockerfile`, `deploy/init-db.sh`): Postgres + one-shot migrations + web + worker. `cp .env.example .env`, set `POSTGRES_PASSWORD`, `APP_DB_PASSWORD`, `APP_ENCRYPTION_KEY`, then `docker compose up --build`. Put a TLS reverse proxy in front. *The compose files are provided but could not be built or run in the authoring environment (no Docker daemon) — treat as unverified until you run them.*
-* **Vercel / serverless**: works (stateless app, Postgres via connection pooler); drive jobs by calling `/api/v1/jobs/run` with `Authorization: Bearer $CRON_SECRET` from a scheduler instead of the worker.
+* **Vercel / serverless**: designed for it (stateless app, Postgres via connection pooler); step-by-step checklist in [docs/deploy-vercel.md](docs/deploy-vercel.md) (`npm run db:setup`, environment variables, `npm run smoke`). `vercel.json` schedules the job sweep daily via `/api/v1/jobs/run` (`CRON_SECRET`). **Not yet verified on a live Vercel deployment.**
 * Health: `GET /api/v1/health` (liveness), `GET /api/v1/ready` (DB + migration version). Logs are structured JSON with request ids and secret redaction. Boot fails fast on missing `APP_ENCRYPTION_KEY`/`DATABASE_URL` in production.
 * Scaling: stateless app instances; sessions, rate limits, idempotency and job locks live in Postgres, so any number of replicas and workers can run. Use PgBouncer (transaction mode is compatible: tenant context is set per transaction). See [docs/operations.md](docs/operations.md) for backup, restore, retention and tuning.
 
