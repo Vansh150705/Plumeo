@@ -62,7 +62,7 @@ in instantly, the same way it would after a real Entra OAuth callback.
 - Microsoft Entra ID SSO (mocked with the same response shape as Graph `/me`)
 - In-app notifications on every lifecycle event, surfaced in a per-user inbox
 - Rule-based escalations on stale approvals *and overdue quarterly check-ins*, swept nightly by a Vercel cron (batched queries, no N+1)
-- Tested core: Vitest suite over every scoring formula and validation rule; GitHub Actions runs typecheck + tests + build on every push
+- Tested core: Vitest covers every scoring formula and validation rule, the escalation sweep, the cron endpoint, and a 48-case Row Level Security suite that runs the real migrations in an in-memory Postgres; GitHub Actions runs lint + typecheck + tests + build on every push
 - Analytics: quarter-over-quarter trends, distribution by thrust area, department heatmap, manager effectiveness
 
 ---
@@ -104,15 +104,70 @@ scripts/seed.ts           # demo data in every workflow state
 
 ## Running locally
 
+Requires Node 20+ and a free [Supabase](https://supabase.com) project.
+
 ```bash
 npm install
-# add Supabase keys to .env.local (see .env.example)
-npm run dev        # http://localhost:3000
-npm run seed       # populate demo data (needs the service-role key)
-
-npm test           # run the Vitest suite
-npm run typecheck  # tsc --noEmit
+cp .env.example .env.local   # then fill in the three Supabase values (Settings -> API)
 ```
+
+**Set up the database.** In the Supabase SQL editor, run the files in `supabase/migrations/`
+in order: `0001` to `0005`. `0005_security_hardening.sql` is required: it closes privilege-escalation
+holes in the original policies and fixes employee submit / manager shared-goal push under RLS.
+(If you use the Supabase CLI instead: `supabase db push`.)
+
+```bash
+npm run seed       # populate demo users and a goal sheet in every workflow state (needs the service-role key)
+npm run dev        # http://localhost:3000, then click a demo tile to sign in
+```
+
+### Checks
+
+```bash
+npm run lint       # ESLint (next/core-web-vitals)
+npm run typecheck  # tsc --noEmit
+npm test           # Vitest: unit + escalation + cron + Row Level Security suite
+npm run build      # production build
+```
+
+The RLS suite needs no database: it loads `supabase/migrations/*.sql` into an in-memory Postgres
+([PGlite](https://pglite.dev)) and exercises each policy as the `authenticated` / `anon` roles, covering
+both the flows that must work and the attacks that must be rejected.
+
+---
+
+## Deployment
+
+Plumeo deploys to [Vercel](https://vercel.com) with Supabase as the database.
+
+1. Import the repo in Vercel (framework preset: Next.js).
+2. Set these environment variables for Production:
+
+   | Variable | Required | Notes |
+   |----------|----------|-------|
+   | `NEXT_PUBLIC_SUPABASE_URL` | yes | Supabase project URL |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Public anon key (safe in the browser; RLS protects the data) |
+   | `SUPABASE_SERVICE_ROLE_KEY` | yes | **Secret.** Server only: demo sign-in provisioning and the cron |
+   | `CRON_SECRET` | yes, for the nightly sweep | Any long random string. Vercel Cron sends it as `Authorization: Bearer ...`; the endpoint refuses to run without it |
+   | `GROQ_API_KEY` | optional | Enables the AI assists; the app works without it |
+
+3. Apply the five migrations to the production Supabase project (see above) and run `npm run seed` once.
+
+`vercel.json` schedules `/api/cron/escalations` nightly at 02:00 UTC.
+
+---
+
+## Security notes
+
+- **Authorisation is enforced in the database** with Row Level Security. The `0005` migration adds a
+  sheet state machine (Draft -> Submitted -> Approved/Returned), blocks self-promotion, forged audit rows
+  and self-approval, and restricts the user directory to signed-in users. Each rule has a regression test.
+- **Sign-in is a demo.** The "Entra ID" directory is mocked, and one click signs you in as any seeded
+  persona with a deterministic password. That is deliberate so reviewers can explore every role, and it is
+  only appropriate for demo data. Do not put real data behind it; swap `lib/auth.ts` for a real OAuth callback first.
+- **Known limitations:** `check_ins.computed_score` is calculated by the server action but is writable by
+  the check-in owner through the REST API; the audit log is written by the app, not by database triggers; and
+  the project is on Next.js 14, whose remaining advisories are fixed only in 15.x and later (upgrade tracked).
 
 ---
 

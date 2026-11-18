@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea, Label } from '@/components/ui/input';
@@ -56,14 +57,18 @@ export function GoalSheetEditor({
     if (!confirm('Delete this goal?')) return;
     const res = await deleteGoal(id);
     if (res.ok) setGoals(prev => prev.filter(g => g.id !== id));
+    else toast.error(res.error);
   }
 
   async function handleSubmit() {
     startTransition(async () => {
       const res = await submitSheet(sheet.id);
       if (!res.ok) {
-        alert('Submission failed:\n\n' + (res.issues?.map(i => '• ' + i.message).join('\n') ?? 'Unknown error'));
+        toast.error(res.error || 'Submission failed.', {
+          description: res.issues?.length ? res.issues.map(x => `- ${x.message}`).join(' ') : undefined,
+        });
       } else {
+        toast.success("Submitted for your manager's approval.");
         router.refresh();
       }
     });

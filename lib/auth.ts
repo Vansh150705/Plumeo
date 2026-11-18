@@ -118,6 +118,14 @@ export async function ssoSignIn(oid: string) {
 
 /** Re-syncs every user's manager chain + role from Entra. Admin-only. */
 export async function syncEntraDirectory() {
+  // Server actions are public POST endpoints, so the Admin-only promise must be enforced here,
+  // not just by hiding the button. This runs with the service-role client below.
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('UNAUTHENTICATED');
+  const { data: me } = await supabase.from('users').select('role').eq('id', user.id).maybeSingle();
+  if (me?.role !== 'Admin') throw new Error('FORBIDDEN');
+
   const admin = createAdminClient();
   // Pass 1: upsert all users
   for (const claims of MOCK_DIRECTORY) {
