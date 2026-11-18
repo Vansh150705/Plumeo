@@ -6,6 +6,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 export function NavigationProgress() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const query = searchParams?.toString();
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(false);
 
@@ -17,9 +18,10 @@ export function NavigationProgress() {
     const ramp2 = setTimeout(() => setProgress(70), 200);
     const ramp3 = setTimeout(() => setProgress(85), 400);
 
+    let hide: ReturnType<typeof setTimeout> | undefined;
     const finish = setTimeout(() => {
       setProgress(100);
-      setTimeout(() => {
+      hide = setTimeout(() => {
         setVisible(false);
         setProgress(0);
       }, 200);
@@ -30,8 +32,9 @@ export function NavigationProgress() {
       clearTimeout(ramp2);
       clearTimeout(ramp3);
       clearTimeout(finish);
+      if (hide) clearTimeout(hide);
     };
-  }, [pathname, searchParams?.toString()]);
+  }, [pathname, query]);
 
   return (
     <div

@@ -7,23 +7,28 @@ on:
 
 jobs:
   verify:
-    name: Typecheck & test
+    name: Lint, typecheck, test & build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Unit tests
+      # Unit tests (scoring + validation) and the Row Level Security suite, which loads the
+      # real supabase/migrations into an in-memory Postgres, so no external database is needed.
+      - name: Tests
         run: npm test
 
       - name: Build
@@ -33,3 +38,9 @@ jobs:
           # without real secrets. Runtime still requires the real values.
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+
+      # Informational for now: Next 14 is end-of-life and its remaining advisories are only
+      # fixed in 15.x+. Tracked as a follow-up; see the README "Security" section.
+      - name: Dependency audit (production, high+)
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true
