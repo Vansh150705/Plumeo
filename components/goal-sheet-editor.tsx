@@ -35,7 +35,8 @@ export function GoalSheetEditor({
   const issues = useMemo(() => validateSheet(goals), [goals]);
   const total = totalWeightage(goals);
   const canSubmit = issues.length === 0;
-  const locked = readOnly || sheet.status === 'Approved' || sheet.status === 'Locked';
+  const awaitingApproval = sheet.status === 'Submitted';
+const locked = readOnly || awaitingApproval || sheet.status === 'Approved' || sheet.status === 'Locked';
   const remainingPct = REQUIRED_TOTAL_WEIGHTAGE - total;
 
   async function handleUpsert(g: Partial<Goal>) {
@@ -101,6 +102,22 @@ export function GoalSheetEditor({
             <div>
               <div className="text-sm font-medium mb-1">Returned for rework</div>
               <div className="text-sm text-muted-foreground">{sheet.return_comment}</div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Submitted: waiting on the manager, nothing to edit */}
+      {awaitingApproval && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="p-4 flex gap-3">
+            <Info className="size-4 text-primary mt-0.5 shrink-0" />
+            <div>
+              <div className="text-sm font-medium mb-1">Awaiting approval</div>
+              <div className="text-sm text-muted-foreground">
+                {sheet.submitted_at ? `Submitted ${fmtDate(sheet.submitted_at)}. ` : ''}
+                Your goals are with your manager and can&apos;t be edited unless they return the sheet to you.
+              </div>
             </div>
           </CardContent>
         </Card>
